@@ -44,7 +44,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
         status: newStatus,
         updatedAt: new Date().toISOString(),
         receivedAt:
-          newStatus.toUpperCase() === 'RECEIVED'
+          (newStatus.toUpperCase() === 'RECEIVED' || newStatus.toUpperCase() === 'WAITING')
             ? new Date().toISOString()
             : parcel[index].receivedAt
       })
@@ -63,7 +63,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
       const removed = parcel.splice(index, 1)[0]
       trash.push({
         ...removed,
-        original: { ...removed }, // เก็บสภาพก่อนลบ
+        original: { ...removed }, 
         deletedAt: new Date().toISOString()
       })
     }

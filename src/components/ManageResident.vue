@@ -89,7 +89,6 @@ const residentStatusDetail = ref(null)
 const showDeleteMemberSuccess = ref(false)
 const showDeleteMemberError = ref(false)
 
-// Generic State for Alerts from Child Components
 const childAlert = ref({
   visible: false,
   message: '',
@@ -152,6 +151,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'WAITING':
+      return 'Waiting'
     case 'PENDING':
       return 'Pending'
     default:
@@ -159,11 +160,7 @@ const mapStatus = (status) => {
   }
 }
 const showAddParcelPage = () => {
-  // If this is meant to go to the add member page:
   router.push({ name: 'addmember' })
-
-  // OR if you have a specific 'addparcel' route:
-  // router.push({ name: 'addparcel' })
 }
 const mapActiveStatus = (status) => {
   if (!status) return ''
@@ -219,16 +216,14 @@ onMounted(async () => {
       email: p.email,
       dormName: p.dormName,
       roomNumber: p.roomNumber,
-      role: p.role, // "RESIDENT" | "STAFF"
+      role: p.role, 
       status: p.status,
-      updateAt: p.updatedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
-      photo: p.profileImageUrl // 🔥 table ใช้ photo
+      updateAt: p.updatedAt, 
+      photo: p.profileImageUrl 
     }))
 
-    // เรียงตาม update ล่าสุด
     mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
-    // 🔹 แยก role
     const residentList = mapped.filter((u) => u.role === 'RESIDENT')
     const staffList = mapped.filter((u) => u.role === 'STAFF')
 
@@ -261,7 +256,6 @@ const confirmStatusChange = () => {
 }
 
 const showRegistrationDetail = (id) => {
-  // id = user.id (จาก mapped)
   router.push({
     name: 'detailregistration',
     params: {
@@ -370,7 +364,6 @@ const clearDeleteMemPopUp = () => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-// เพิ่ม function สำหรับ refresh ข้อมูล
 const refreshUserData = async () => {
   try {
     const dataUser = await getItems(
@@ -404,15 +397,12 @@ const refreshUserData = async () => {
   }
 }
 
-// แก้ไข showDelMemComplete
 const isLoading = ref(false)
 
 const showDelMemComplete = async () => {
   isLoading.value = true
   showDeleteMember.value = false
   MemberDetail.value = null
-
-  // ✅ fetch ข้อมูลใหม่
   await refreshUserData()
 
   isLoading.value = false
@@ -440,8 +430,6 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
 const sortStatusAsc = () => sortByStatus(usersByTab.value)
 const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
 const sortDateAsc = () => sortByDate(usersByTab.value)
@@ -596,7 +584,6 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
-// Reset to page 1 whenever filters change to avoid empty pages
 watch([searchKeyword, selectedDate, activeTab], () => {
   currentPage.value = 1
 })
@@ -867,10 +854,7 @@ const showResidentDetail = async function (id) {
                   {{ tab }}
                 </button>
               </div>
-
-              <!-- Status Stats Cards -->
               <div class="flex flex-wrap sm:flex-nowrap items-center justify-start sm:justify-end gap-1.5 sm:gap-3 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
-                <!-- Total Users Card -->
                 <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -885,8 +869,6 @@ const showResidentDetail = async function (id) {
                     </div>
                   </div>
                 </div>
-
-                <!-- Currently Active Card -->
                 <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -901,8 +883,6 @@ const showResidentDetail = async function (id) {
                     </div>
                   </div>
                 </div>
-
-                <!-- Pending Approval Card (Only for Residents tab) -->
                 <div v-if="activeTab === 'Residents'" class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-amber-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 transition-colors duration-300 group-hover:bg-amber-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -996,7 +976,6 @@ const showResidentDetail = async function (id) {
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <!-- Unified Popup for Child Component Events -->
           <AlertPopUp
             v-if="childAlert.visible"
             :titles="childAlert.title"

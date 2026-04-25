@@ -8,6 +8,7 @@ const router = useRouter()
 const resetStore = useResetPasswordManager()
 const emailRequire = ref(false)
 const isEmailInvalidChars = ref(false)
+const emailWhitespaceError = ref(false)
 const form = ref({
   email: ''
 })
@@ -35,6 +36,15 @@ const sendResetEmail = async () => {
   error.value = false
 
   loading.value = true
+
+  const hasWhitespace = (s) => s && (s !== s.trim())
+
+  if (hasWhitespace(form.value.email)) {
+    emailWhitespaceError.value = true
+    loading.value = false
+    setTimeout(() => (emailWhitespaceError.value = false), 10000)
+    return
+  }
 
   if (!trimmedEmail.value) {
     emailRequire.value = true
@@ -76,6 +86,7 @@ const closePopUp = (operate) => {
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'emailEmpty') emailRequire.value = false
   if (operate === 'emailInvalidChars') isEmailInvalidChars.value = false
+  emailWhitespaceError.value = false
 }
 
 const returnLoginPage = () => {
@@ -88,7 +99,6 @@ const returnLoginPage = () => {
     <div
       class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 relative overflow-hidden"
     >
-      <!-- Subtle Decorative Blobs -->
       <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -187,10 +197,10 @@ const returnLoginPage = () => {
             Enter your email below to reset your password.
           </span>
         </p>
-     <div class="fixed top-30">
+        <div class="fixed top-30">
         <AlertPopUp
           v-if="error"
-          :titles="'Failed to send reset password email. Please try again later.'"
+          titles="Failed to send reset password email. Please try again later."
           message="Error!!"
           styleType="red"
           operate="problem"
@@ -199,7 +209,7 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="success"
-          :titles="' Reset password link has been sent to your email. Please check your email to continue.'"
+          titles="Reset password link has been sent to your email. Please check your email to continue."
           message="Success!!"
           styleType="green"
           operate="success"
@@ -223,15 +233,16 @@ const returnLoginPage = () => {
           operate="emailEmpty"
           @closePopUp="closePopUp"
         />
-         <AlertPopUp
-            v-if="isEmailInvalidChars"
-            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
-            message="Error!!"
-            styleType="red"
-            operate="emailInvalidChars"
-            @closePopUp="closePopUp"
-          />
-          </div>
+
+        <AlertPopUp
+          v-if="isEmailInvalidChars"
+          titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
+          message="Error!!"
+          styleType="red"
+          operate="emailInvalidChars"
+          @closePopUp="closePopUp"
+        />
+        </div>
 
         <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
           <div class="relative">
@@ -239,8 +250,31 @@ const returnLoginPage = () => {
               v-model="form.email"
               type="email"
               placeholder="Enter Your Email Account"
-              class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+              class="w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
+              :class="[
+                emailWhitespaceError || emailRequire || incorrectemailform || isEmailInvalidChars
+                  ? 'border-red-500 focus:ring-red-200 text-red-500'
+                  : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
+              ]"
             />
+            <div
+              v-if="emailWhitespaceError"
+              class="flex items-center text-xs text-red-500 mt-1.5 ml-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-3.5 h-3.5 mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span v-if="emailWhitespaceError">Email cannot contain leading or trailing spaces.</span>
+            </div>
           </div>
 
            <ButtonWeb

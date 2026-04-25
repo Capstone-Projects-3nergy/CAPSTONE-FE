@@ -119,10 +119,15 @@ const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 const showDateError = ref(false)
 const whitespaceError = ref(false)
+const titleWhitespaceError = ref(false)
+const subtitleWhitespaceError = ref(false)
+const contentWhitespaceError = ref(false)
 const titleDuplicateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
+
+const hasWhitespace = (s) => s && (s !== s.trim());
 
 const formatText = (style) => {
   if (!contentArea.value) return
@@ -192,7 +197,12 @@ const closePopUp = (operate) => {
   if (operate === 'errorMessage') { error.value = false }
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
   if (operate === 'dateError') { showDateError.value = false }
-  if (operate === 'whitespaceError') { whitespaceError.value = false }
+  if (operate === 'whitespaceError') {
+    whitespaceError.value = false
+    titleWhitespaceError.value = false
+    subtitleWhitespaceError.value = false
+    contentWhitespaceError.value = false
+  }
   if (operate === 'titleDuplicateError') { titleDuplicateError.value = false }
 }
 
@@ -343,8 +353,19 @@ const submitAnnouncement = async () => {
     }, 10000)
     return
   }
+  titleWhitespaceError.value = hasWhitespace(title.value)
+  subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
+  contentWhitespaceError.value = hasWhitespace(content.value)
 
-  // Duplicate Title check
+  if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
+    setTimeout(() => {
+      titleWhitespaceError.value = false
+      subtitleWhitespaceError.value = false
+      contentWhitespaceError.value = false
+    }, 10000)
+    return
+  }
+
   const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
   if (isDuplicate) {
     titleDuplicateError.value = true
@@ -354,14 +375,7 @@ const submitAnnouncement = async () => {
     return
   }
 
-  // Whitespace check
-  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
-    whitespaceError.value = true
-    setTimeout(() => {
-      whitespaceError.value = false
-    }, 10000)
-    return
-  }
+
 
   if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
@@ -384,7 +398,7 @@ const submitAnnouncement = async () => {
       priority: 1,
       publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
       publishNow: true,
-      coverImageUrl: "" // Backend คาดหวังฟิลด์นี้ (ใส่ว่างไว้ก่อนถ้ายังไม่ได้ upload ภาพแยก)
+      coverImageUrl: ""
     }
 
     if (imageFile.value) {
@@ -443,26 +457,23 @@ const resetForm = () => {
   sendNotification.value = true
   imageFile.value = null
   imagePreview.value = ''
+  titleWhitespaceError.value = false
+  subtitleWhitespaceError.value = false
+  contentWhitespaceError.value = false
 }
 
 const saveDraft = async () => {
+  let hasError = false
   titleError.value = false
   categoryError.value = false
   contentError.value = false
-  whitespaceError.value = false
-  
-  let hasError = false
-  if (!title.value.trim()) { titleError.value = true; hasError = true }
-  if (categoryId.value === null) { categoryError.value = true; hasError = true }
-  if (!content.value.trim()) { contentError.value = true; hasError = true }
-  
-  // Whitespace check
-  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
-    whitespaceError.value = true
+  titleWhitespaceError.value = hasWhitespace(title.value)
+  subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
+  contentWhitespaceError.value = hasWhitespace(content.value)
+
+  if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
     hasError = true
   }
-
-  // Duplicate Title check
   const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
   if (isDuplicate) {
     titleDuplicateError.value = true
@@ -475,6 +486,9 @@ const saveDraft = async () => {
       categoryError.value = false
       contentError.value = false
       whitespaceError.value = false
+      titleWhitespaceError.value = false
+      subtitleWhitespaceError.value = false
+      contentWhitespaceError.value = false
     }, 10000)
     return
   }
@@ -878,8 +892,8 @@ const returnLoginPage = async () => {
                       placeholder="Enter announcement title"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        titleLengthError || titleThaiNumError
-                          ? 'border-red-500 focus:ring-red-500'
+                        titleError || titleLengthError || titleThaiNumError || titleWhitespaceError || titleDuplicateError
+                          ? 'border-red-500 focus:ring-red-500 text-red-600'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
                    />
@@ -890,6 +904,10 @@ const returnLoginPage = async () => {
                    <div v-if="titleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
                       <div class="text-sm text-red-600">Announcement Title cannot contain Thai numerals</div>
+                   </div>
+                   <div v-if="titleWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                    </div>
                 </div>
 
@@ -903,8 +921,8 @@ const returnLoginPage = async () => {
                       placeholder="Enter brief description"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        subtitleLengthError 
-                          ? 'border-red-500 focus:ring-red-500'
+                        subtitleLengthError || subtitleWhitespaceError || subtitleThaiNumError
+                          ? 'border-red-500 focus:ring-red-500 text-red-600'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
                    />
@@ -915,6 +933,10 @@ const returnLoginPage = async () => {
                    <div v-if="subtitleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
                       <div class="text-sm text-red-600">Subtitle cannot contain Thai numerals</div>
+                   </div>
+                   <div v-if="subtitleWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                    </div>
                 </div>
 
@@ -930,7 +952,6 @@ const returnLoginPage = async () => {
                         customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                       >
                         <template v-if="currentCategory" #icon>
-                          <!-- Dynamic Icon Mapping for SelectWeb -->
                           <svg v-if="currentCategory.name.includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                           <svg v-else-if="currentCategory.name.includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                           <svg v-else-if="currentCategory.name.includes('Event') || currentCategory.name.includes('Activity')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -939,16 +960,18 @@ const returnLoginPage = async () => {
                         </template>
                       </SelectWeb>
                    </div>
-                   <!-- Publish Date (Conditional) -->
                    <div v-if="activeTab === 'draft'" class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date</label>
                       <div class="relative flex items-center group">
-                        <!-- Icon Overlay -->
+
                         <div 
                           class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
                           @click="openDatePicker"
                         >
-                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                          <div 
+                            class="p-1.5 bg-white rounded-lg shadow-sm flex items-center justify-center border transition-all duration-200"
+                            :class="showDateError ? 'text-red-600 border-red-200' : 'text-[#0E4B90] border-gray-100'"
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                               <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -958,7 +981,6 @@ const returnLoginPage = async () => {
                           </div>
                         </div>
                         
-                        <!-- Display Input (Text) -->
                         <input 
                            type="text" 
                            readonly
@@ -966,9 +988,9 @@ const returnLoginPage = async () => {
                            placeholder="DD/MM/YYYY - HH:mm"
                            @click="openDatePicker"
                            class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                           :class="{ 'text-red-600 border-red-500 ring-2 ring-red-100': showDateError }"
                         />
 
-                        <!-- Hidden Native Datetime Input -->
                         <input
                            ref="dateInput"
                            type="datetime-local" 
@@ -979,21 +1001,27 @@ const returnLoginPage = async () => {
                       </div>
                    </div>
                 </div>
-
-                <!-- Content -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
-                   <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
-                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                         :class="contentLengthError || contentWhitespaceError || contentError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
                          ref="contentArea"
                          :value="content"
                          @input="handleContentInput"
                          rows="6"
-                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         class="w-full px-4 py-3 outline-none placeholder:text-gray-400 resize-y"
+                         :class="[
+                            contentError || contentLengthError || contentWhitespaceError
+                              ? 'text-red-600'
+                              : 'text-gray-800'
+                          ]"
                          placeholder="Enter announcement content"
                       ></textarea>
+                    </div>
+                    <div v-if="contentWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
@@ -1001,7 +1029,6 @@ const returnLoginPage = async () => {
                     </div>
                 </div>
 
-                <!-- Cover Image Upload -->
                 <div class="space-y-2">
                   <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
                   
@@ -1030,8 +1057,6 @@ const returnLoginPage = async () => {
                        class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
                        @click="toggleLightbox"
                      />
-                     
-                     <!-- Image Actions Overlay -->
                      <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                        <button 
                          @click="removeImage" 
@@ -1112,9 +1137,6 @@ const returnLoginPage = async () => {
     </div>
     <LoadingPopUp v-if="isLoading" />
 
-
-
-    <!-- Lightbox Overlay -->
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
           <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">

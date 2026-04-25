@@ -5,14 +5,14 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
   const announcements = reactive([])
   const trash = reactive([])
 
-  /* ---------- helpers ---------- */
+
   const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
 
-  /* ---------- getters ---------- */
+
   const getAnnouncements = () => announcements
   const getTrash = () => trash
 
-  /* ---------- mapping helper ---------- */
+
   const mapItem = (item) => {
     if (!item) return null
     if (item._isMapped) return item
@@ -38,7 +38,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     }
   }
 
-  /* ---------- setters ---------- */
+
   const setAnnouncements = (list = []) => {
     announcements.length = 0
     const items = Array.isArray(list) ? list : [list]
@@ -57,13 +57,13 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     })
   }
 
-  /* ---------- add ---------- */
+
   const addAnnouncement = (item) => {
     const mapped = mapItem(item)
     if (mapped) announcements.push(mapped)
   }
 
-  /* ---------- update ---------- */
+
   const updateAnnouncement = (updated) => {
     const index = findIndexById(announcements, updated.id)
     if (index !== -1) {
@@ -86,7 +86,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     }
   }
 
-  /* ---------- move to trash ---------- */
+
   const moveAnnouncementToTrash = (id) => {
     const index = findIndexById(announcements, id)
     if (index !== -1) {
@@ -98,7 +98,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     }
   }
 
-  /* ---------- restore ---------- */
+
   const restoreFromTrash = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
@@ -112,7 +112,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     }
   }
 
-  /* ---------- delete permanent ---------- */
+
   const deletePermanent = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
@@ -120,7 +120,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     }
   }
 
-  /* ---------- find ---------- */
+
   const findAnnouncementById = (id) => announcements.find((a) => a.id === id)
 
   const totalPinned = computed(() => announcements.filter((a) => a.pinned).length)

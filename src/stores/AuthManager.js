@@ -87,9 +87,6 @@ export const useAuthManager = defineStore('authManager', () => {
       return methods.length > 0
     } catch (error) {
       if (error.code === 'auth/invalid-email') return false
-      // If email enumeration protection is on, this might basically result in empty array or similar behavior,
-      // but for standard projects it works.
-      console.error('Check email failed:', error)
       return false
     }
   }
@@ -146,13 +143,13 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const baseURL = import.meta.env.VITE_BASE_URL
       const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
-      // 🔽 ADD ตรงนี้ // login Firebase เพื่อให้ได้ currentUser
+      
       const cred = await signInWithEmailAndPassword(
         auth,
         payload.email,
         payload.password
       )
-      // ส่ง verify email
+  
       await sendEmailVerification(cred.user)
 
       successMessage.value =
@@ -336,7 +333,6 @@ export const useAuthManager = defineStore('authManager', () => {
     const token = user.value?.accessToken
     const baseURL = import.meta.env.VITE_BASE_URL
 
-    // 🔹 เรียก backend logout เฉพาะกรณีมี token และออนไลน์
     if (token && navigator.onLine) {
       try {
         await axios.post(
@@ -346,23 +342,21 @@ export const useAuthManager = defineStore('authManager', () => {
             headers: {
               Authorization: `Bearer ${token}`
             },
-            timeout: 5000 // กันค้าง
+            timeout: 5000 
           }
         )
       } catch (apiErr) {
-        // ❗ ไม่ต้อง console.error
         console.warn('Backend logout failed, continue frontend logout')
       }
     }
 
-    // 🔹 logout Firebase
     await signOut(auth)
   } finally {
-    // ✅ เคลียร์ notification state & localStorage
+
     useNotificationManager().clearNotifications()
     useSidebarManager().resetSidebar()
     
-    // ✅ เคลียร์ state เสมอ
+
     user.value = null
     await router?.replace({ name: 'login' })
   }
@@ -402,16 +396,13 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
   const useAuthGuard = (router) => {
-    // 🔹 Listen for auth state changes (e.g. login from another tab)
     onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // If user is already logged in but firebaseUser changed (switched account in another tab)
         if (user.value && user.value.uid !== firebaseUser.uid) {
-           await loadUserFromBackend() // reload new user role
-           router.replace({ name: 'login' }) // force re-login/check
+           await loadUserFromBackend() 
+           router.replace({ name: 'login' }) 
         }
       } else {
-        // Logged out in another tab
         if (user.value) {
            user.value = null
            router.replace({ name: 'login' })
@@ -439,12 +430,10 @@ export const useAuthManager = defineStore('authManager', () => {
         if (!newToken) return next({ name: 'login' })
       }
 
-      // Protect Resident Routes
       if (to.path.startsWith('/homepage/resident') && user.value.role !== 'RESIDENT') {
         return next({ name: 'login' })
       }
 
-      // Protect Staff Routes
       if (to.path.startsWith('/homepage/staff') && user.value.role !== 'STAFF') {
         return next({ name: 'login' })
       }
@@ -455,18 +444,17 @@ export const useAuthManager = defineStore('authManager', () => {
   const updateUser = (updatedProfile) => {
     if (!user.value || !updatedProfile) return
 
-    // update name
+
     if (updatedProfile.firstName || updatedProfile.lastName) {
       user.value.fullName =
         `${updatedProfile.firstName ?? ''} ${updatedProfile.lastName ?? ''}`.trim()
     }
 
-    // update email
+ 
     if (updatedProfile.email) {
       user.value.email = updatedProfile.email
     }
 
-    // role specific
     if (user.value.role === 'STAFF') {
       if ('position' in updatedProfile) {
         user.value.position = updatedProfile.position
@@ -479,12 +467,10 @@ export const useAuthManager = defineStore('authManager', () => {
       }
     }
 
-    // avatar (ถ้ามี)
     if (updatedProfile.avatar) {
       user.value.avatar = updatedProfile.avatar
     }
 
-    // lineId (ถ้ามี)
     if ('lineId' in updatedProfile) {
       user.value.lineId = updatedProfile.lineId
     }

@@ -46,7 +46,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
@@ -552,16 +551,16 @@ const closePopUp = (operate) => {
                   <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                     >Current status</label
                   >
-                  <div
-                    class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center border"
-                    :class="{
-                      'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
-                      'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
-                    }"
-                  >
-                    {{ formatStatus(parcel?.status) }}
-                  </div>
+                    <div
+                      class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center border"
+                      :class="{
+                        'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                        'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING',
+                        'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
+                      }"
+                    >
+                      {{ formatStatus(parcel?.status) }}
+                    </div>
                 </div>
               </div>
             </section>
@@ -574,7 +573,7 @@ const closePopUp = (operate) => {
                 @click="showHomePageResidentWeb"
               />
               <ButtonWeb
-                v-if="currentParcelStatus === 'RECEIVED'"
+                v-if="currentParcelStatus === 'RECEIVED' || currentParcelStatus === 'WAITING'"
                 type="button"
                 label="Confirm"
                 color="blue"

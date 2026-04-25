@@ -64,19 +64,8 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
-import package1 from '@/assets/images/Package1.png'
-import package2 from '@/assets/images/Package2.png'
-import package3 from '@/assets/images/Package3.png'
-import parcels1 from '@/assets/images/parcels.jpg'
-import parcels2 from '@/assets/images/parcels2.jpg'
-import parcels3 from '@/assets/images/parcels3.jpg'
-import parcels4 from '@/assets/images/parcels4.jpg'
-import newsImg from '@/assets/images/New.png'
-import eventImg from '@/assets/images/Event.png'
-import communityImg from '@/assets/images/COMMUNITY.png'
 
 const authStore = useAuthManager()
-
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const announcementManager = useAnnouncementManager()
@@ -105,8 +94,6 @@ const parcelsResidentDetail = ref(null)
 const route = useRoute()
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
-
-// Modal State
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
 
@@ -122,6 +109,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'WAITING':
+      return 'Waiting'
     default:
       return status
   }
@@ -467,7 +456,6 @@ const openRedPopup = () => {
 }
 
 const openStatusPopup = () => {
-  // Placeholder for status popup logic
 }
 
 const closePopUp = (operate) => {
@@ -539,17 +527,8 @@ const handleSortUpdate = (val) => {
 }
 //
 const userName = computed(() => loginStore.user?.name || 'Guest')
-
-const slides = [parcels1, parcels2, parcels3, parcels4]
 const currentIndex = ref(0)
 const registerStore = useAuthManager()
-function prevSlide() {
-  currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
-}
-
-function nextSlide() {
-  currentIndex.value = (currentIndex.value + 1) % slides.length
-}
 
 const latestAnnouncements = computed(() => {
   return announcements.value
@@ -589,14 +568,12 @@ const openModal = async (item) => {
   if (!item || !item.id) return
 
   try {
-    // 1. Record the view first to ensure the standard view count is updated on server
     await recordAnnouncementView(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
       router
     )
 
-    // 2. Fetch the announcement details (which now has the updated view count)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -652,11 +629,7 @@ const fetchAnnouncements = async () => {
 
 onMounted(async () => {
   window.addEventListener('focus', fetchAnnouncements)
-
-  // Initial fetch
   await fetchAnnouncements()
-
-  // Set up periodic fetch for latest updates
   announcementsInterval = setInterval(fetchAnnouncements, 30000)
 })
 
@@ -1014,9 +987,9 @@ function formatDateTime(datetimeStr) {
                 </ParcelTable>
             </div>
           </div>
-        <!-- Latest News Section -->
+      
         <div class="px-3 md:px-6 pb-20 overflow-hidden">
-          <!-- Balanced Header Section -->
+       
           <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
             <div class="space-y-4">
               <div class="flex items-center gap-4">
@@ -1050,16 +1023,13 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
 
-          <!-- Dynamic Stories Grid -->
           <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-stretch anim-fade-in">
             
-            <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
               class="lg:col-span-7 group cursor-pointer bg-white rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
             >
               <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
-                <!-- Image with fallback to Placeholder -->
                 <img 
                   v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
                   :src="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
@@ -1072,7 +1042,7 @@ function formatDateTime(datetimeStr) {
                   </svg>
                 </div>
                 
-                <!-- Hover Overlay -->
+             
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                   <div class="bg-white/20 border border-white/40 px-6 py-3 rounded-2xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
                     <span class="text-white text-sm font-bold tracking-wider">Read Full Details</span>
@@ -1124,7 +1094,6 @@ function formatDateTime(datetimeStr) {
               </div>
             </div>
 
-            <!-- Small Stories List (Right) -->
             <div class="lg:col-span-5 flex flex-col gap-6">
               <div 
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
@@ -1145,7 +1114,6 @@ function formatDateTime(datetimeStr) {
                     </svg>
                   </div>
 
-                  <!-- Hover Overlay -->
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                     <div class="bg-white/20 border border-white/40 px-2 py-1.5 rounded-lg backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-xl flex items-center gap-1.5">
                       <span class="text-white text-[7px] font-black tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
@@ -1185,7 +1153,7 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
 
-          <!-- Empty State -->
+        
           <div v-else class="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
              <div class="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

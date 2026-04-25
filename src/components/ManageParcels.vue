@@ -128,6 +128,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'WAITING':
+      return 'Waiting'
     default:
       return status
   }
@@ -136,7 +138,6 @@ const mapStatus = (status) => {
 onUnmounted(() => {
 })
 onMounted(async () => {
-  // Fetch parcels data
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
@@ -145,10 +146,10 @@ onMounted(async () => {
   if (data) {
     const mapped = data.map((p) => ({
       id: p.parcelId,
-      trackingNumber: p.trackingNumber,
-      recipientName: p.ownerName,
-      roomNumber: p.roomNumber,
-      email: p.contactEmail,
+      trackingNumber: p.trackingNumber || 'Awaiting Staff',
+      recipientName: p.ownerName || 'Awaiting Staff',
+      roomNumber: p.roomNumber || 'Awaiting Staff',
+      email: p.contactEmail || 'Awaiting Staff',
       status: mapStatus(p.status),
       receiveAt: p.receivedAt,
       updateAt: p.updatedAt || null,
@@ -499,7 +500,6 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
-// Reset to page 1 whenever filters change to avoid empty pages
 watch([searchKeyword, selectedDate], () => {
   currentPage.value = 1
 })

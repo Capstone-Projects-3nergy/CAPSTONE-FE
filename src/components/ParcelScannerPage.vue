@@ -51,7 +51,12 @@ const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const recipientNameWhitespaceError = ref(false)
+const senderNameWhitespaceError = ref(false)
 const whitespaceError = ref(false)
+
+const hasWhitespace = (s) => s && (s !== s.trim())
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -59,6 +64,11 @@ const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
+  duplicateParcelError.value = false
+
   if (val.length > 22) {
     const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
@@ -74,6 +84,11 @@ const handleTrackingInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
+  SenderNameError.value = false
+  senderNameWhitespaceError.value = false
+  showSenderLengthError.value = false
+  showSenderMinLengthError.value = false
+
   if (val.length > 100) {
     const sliced = val.slice(0, 100)
     form.value.senderName = sliced
@@ -139,7 +154,7 @@ const form = ref({
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  status: 'received',
+  status: 'WAITING',
   pickupAt: null,
   updateAt: null,
   senderName: null,
@@ -201,7 +216,12 @@ const selectResident = (resident) => {
 }
 
 watch(recipientSearch, (val) => {
-  form.value.recipientName = val // Sync manual input
+  form.value.recipientName = val 
+  recipientNameError.value = false
+  recipientNameLetterError.value = false
+  recipientNameWhitespaceError.value = false
+  error.value = false
+
   if (!val) {
     selectedResidentId.value = null
   }
@@ -238,7 +258,6 @@ async function extractParcelInfo(imageDataUrl) {
     let text = result?.data?.text?.trim()
     if (!text) return null
 
-    // Pre-processing: Normalize some common OCR errors in tracking-like strings
     const normalizedText = text.replace(/[OD]/g, '0').replace(/[IL]/g, '1')
 
     const info = {
@@ -252,7 +271,6 @@ async function extractParcelInfo(imageDataUrl) {
 
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0)
 
-    // 👤 Recipient Search
     const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'ถึง', 'To', 'Recipient', 'ชือผู้รับ', 'ชื่อ']
     for (const line of lines) {
       for (const kw of recipientKeywords) {
@@ -260,7 +278,6 @@ async function extractParcelInfo(imageDataUrl) {
         const match = line.match(regex)
         if (match) {
           let name = match[1].trim()
-          // Clean up: remove phone numbers or addresses if they follow the name
           name = name.split(/(\d{9,10}|โทร|Tel|Address|ที่อยู่)/i)[0].trim()
           name = name.replace(/[^\u0E00-\u0E7Fa-zA-Z\s]/g, '').trim()
           if (name.length >= 2) {
@@ -272,7 +289,6 @@ async function extractParcelInfo(imageDataUrl) {
       if (info.recipientName) break
     }
 
-    // 📤 Sender Search
     const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'จาก', 'From', 'Sender', 'ชือผู้ส่ง']
     for (const line of lines) {
       for (const kw of senderKeywords) {
@@ -291,31 +307,26 @@ async function extractParcelInfo(imageDataUrl) {
       if (info.senderName) break
     }
 
-    // 📦 Tracking & Company Detection
+
     const trackingPatterns = [
-      // 🔹 Priority 1: Clear Prefixes (Check these first)
       { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
       { id: 'Kerry', regex: /KEX[A-Z]\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
       { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
       { id: 'JT_Prefix', idMap: 'JT', regex: /JD\d{13}/i },
       
-      // 🔹 Priority 2: Purely Numeric (Check these last)
-      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, // DHL usually 10 or 12 digits
-      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, // FedEx often longer
-      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, // J&T also uses 12 digits numeric
+      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, 
+      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, 
+      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, 
       
-      // Fallback
       { id: 'Generic', regex: /[A-Z0-9]{8,22}/ }
     ]
 
-    // Use normalized text for tracking numbers
     const searchString = text + ' ' + normalizedText
     const sanitizedSearchString = searchString.replace(/[^A-Z0-9]/g, '')
     
     for (const pattern of trackingPatterns) {
       let match = searchString.match(pattern.regex) || (pattern.altRegex && searchString.match(pattern.altRegex))
       
-      // If no match in raw text, try in sanitized text (useful for messy OCR with dots/slashes)
       if (!match && pattern.id !== 'Generic' && pattern.id !== 'DHL' && pattern.id !== 'FedEx') {
         match = sanitizedSearchString.match(pattern.regex)
       }
@@ -347,11 +358,9 @@ async function extractParcelInfo(imageDataUrl) {
       }
     }
 
-    // 🏠 Room Number
     const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No|Unit)[:\s]*(\d+[\/\d]*)/i)
     if (roomMatch) info.roomNumber = roomMatch[2]
 
-    // 📦 Parcel Type
     const typeText = text.toLowerCase()
     if (typeText.match(/(กล่อง|box|package)/)) info.parcelType = 'BOX'
     else if (typeText.match(/(ซอง|document|letter|envelope|จดหมาย|เอกสาร)/)) info.parcelType = 'DOCUMENT'
@@ -371,16 +380,13 @@ const processScanResult = (text) => {
   scanResult.value = text
 
   try {
-    // Try to parse as JSON first
     const data = JSON.parse(text)
     
-    // If it's an object, map fields
     if (typeof data === 'object' && data !== null) {
       if (data.trackingNumber) form.value.trackingNumber = data.trackingNumber
       if (data.recipientName) {
         form.value.recipientName = data.recipientName
         recipientSearch.value = data.recipientName
-        // Try to find resident by name if available
         const resident = residents.value.find(r => {
            const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
            return fullName === data.recipientName.toLowerCase()
@@ -394,24 +400,18 @@ const processScanResult = (text) => {
       if (data.companyId) form.value.companyId = data.companyId
       if (data.roomNumber) form.value.roomNumber = data.roomNumber
       
-      return // Successfully processed as JSON
+      return 
     }
   } catch (e) {
-    // Not JSON, fall back to simple string (tracking number)
   }
 
-  // Fallback: Treat as tracking number
   form.value.trackingNumber = text
 
-  // Carrier Pattern Detection - Auto select company
   const trackingPatterns = [
-    // 🔹 Priority 1: Clear Prefixes
     { id: 'Flash', regex: /^TH\d{11}[A-Z]$/i },
     { id: 'Kerry', regex: /^KEX[A-Z]\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
     { id: 'Thaipost', regex: /^[A-Z]{2}\d{9}TH$/i },
     { id: 'JT_Prefix', idMap: 'JT', regex: /^JD\d{13}$/i },
-    
-    // 🔹 Priority 2: Purely Numeric (Ordered by specific length hints)
     { id: 'DHL', regex: /^\d{10}$/ },
     { id: 'FedEx', regex: /^\d{15}$/ },
     { id: 'JT_Numeric', idMap: 'JT', regex: /^\d{12}$/ },
@@ -448,7 +448,7 @@ const deletePreview = () => (previewUrl.value = null)
 
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
-    alert('กล้องไม่รองรับ')
+    alert('Camera not supported.')
     return
   }
   try {
@@ -465,7 +465,7 @@ async function startCamera() {
       isCameraReady.value = true
     }
   } catch (err) {
-    alert('ไม่สามารถเปิดกล้องได้')
+    alert('Cannot access the camera.')
   }
 }
 
@@ -501,7 +501,7 @@ async function capturePhoto() {
         form.value.recipientName = info.recipientName
         recipientSearch.value = info.recipientName
         
-        // Try to find resident by name if available
+    
         const resident = residents.value.find(r => {
            const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
            return fullName.includes(info.recipientName.toLowerCase()) || 
@@ -592,7 +592,7 @@ function startQuagga() {
 
         processScanResult(detectedCode)
         
-        // Additional barcode specific logic
+    
         if (!form.value.parcelType) {
             if (detectedCode.startsWith('B')) form.value.parcelType = 'BOX'
             else if (detectedCode.startsWith('D')) form.value.parcelType = 'DOCUMENT'
@@ -600,7 +600,7 @@ function startQuagga() {
         }
         stopScan()
 
-        // Require another 5 matches to process again
+       
         lastCode = ''
         count = 0
       }
@@ -617,7 +617,7 @@ function stopQuagga() {
 
 async function startScan(mode) {
   scanningMode.value = mode
-  await nextTick() // Wait for DOM updates
+  await nextTick() 
 
   if (mode === 'qr') {
     const videoElem = document.getElementById('qr-video')
@@ -642,9 +642,9 @@ async function startScan(mode) {
         returnDetailedScanResult: true,
         calculateScanRegion: (video) => {
           const width = window.innerWidth
-          let size = 400 // default desktop
-          if (width < 640) size = 250 // small mobile
-          else if (width < 768) size = 300 // mobile/tablet
+          let size = 400 
+          if (width < 640) size = 250 
+          else if (width < 768) size = 300 
           
           const smallestDimension = Math.min(video.videoWidth, video.videoHeight)
           const scanRegionSize = Math.min(size, smallestDimension * 0.9)
@@ -736,6 +736,24 @@ const showHomePageStaffWeb = async () => {
 }
 
 const saveParcel = async () => {
+  error.value = false
+  trackingNumberError.value = false
+  recipientNameError.value = false
+  recipientNameLetterError.value = false
+  senderNameError.value = false
+  companyIdError.value = false
+  duplicateParcelError.value = false
+  parcelTypeErrorRequired.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
+  recipientNameWhitespaceError.value = false
+  senderNameWhitespaceError.value = false
+  showTrackingLengthError.value = false
+  showSenderLengthError.value = false
+  showSenderMinLengthError.value = false
+  SenderNameError.value = false
+  roomNumberError.value = false
+
   if (!selectedResidentId.value) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
@@ -769,7 +787,29 @@ const saveParcel = async () => {
     return
   }
 
-  // Whitespace check
+  let hasError = false
+  if (hasWhitespace(form.value.trackingNumber)) {
+    trackingNumberWhitespaceError.value = true
+    hasError = true
+  }
+  if (hasWhitespace(form.value.recipientName)) {
+    recipientNameWhitespaceError.value = true
+    hasError = true
+  }
+  if (hasWhitespace(form.value.senderName)) {
+    senderNameWhitespaceError.value = true
+    hasError = true
+  }
+
+  if (hasError) {
+    setTimeout(() => {
+      trackingNumberWhitespaceError.value = false
+      recipientNameWhitespaceError.value = false
+      senderNameWhitespaceError.value = false
+    }, 10000)
+    return
+  }
+
   if (
     !form.value.trackingNumber.trim() ||
     !form.value.recipientName.trim() ||
@@ -902,7 +942,7 @@ const saveParcel = async () => {
       roomNumber: '',
       parcelType: '',
       contact: '',
-      status: 'received',
+      status: 'WAITING',
       pickupAt: null,
       updateAt: null,
       senderName: null,
@@ -943,6 +983,15 @@ const isAllEmpty = computed(() => {
 })
 const emit = defineEmits(['scan-success', 'scan-error'])
 
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF': return 'Waiting for Staff'
+    case 'PICKED_UP': return 'Picked Up'
+    case 'RECEIVED': return 'Received'
+    case 'WAITING': return 'Waiting'
+    default: return status
+  }
+}
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'addSuccessMessage') addSuccess.value = false
@@ -964,7 +1013,7 @@ function cancelParcel() {
   recipientSearch.value = ''
   selectedResidentId.value = null
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'received' : '')
+    (key) => (form.value[key] = key === 'status' ? 'WAITING' : '')
   )
 }
 
@@ -1122,39 +1171,6 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem
               title=" Manage Parcel"
               @click="showManageParcelPage"
@@ -1337,20 +1353,13 @@ onMounted(async () => {
             />
             <AlertPopUp
               v-if="trackingNumberError"
-              :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+              :titles="'Tracking Number must contain only A–Z, 0–9 and no leading/trailing spaces. Thai characters are not allowed.'"
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
               @closePopUp="closePopUp"
             />
-            <AlertPopUp
-              v-if="trackingNumberFormatError"
-              :titles="'Tracking Number format is incorrect for the selected company.'"
-              message="Error!!"
-              styleType="red"
-              operate="trackingNumberFormat"
-              @closePopUp="closePopUp"
-            />
+
             <AlertPopUp
               v-if="recipientNameError"
               :titles="'Recipient Name is required.'"
@@ -1410,6 +1419,14 @@ onMounted(async () => {
               operate="whitespaceError"
               @closePopUp="closePopUp"
             />
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -1436,18 +1453,14 @@ onMounted(async () => {
                     v-if="scanningMode === 'barcode'"
                     class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
                   >
-                    <!-- Shadow overlay -->
                     <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"></div>
                     
-                    <!-- Scanner Frame -->
                     <div class="relative w-64 h-32 md:w-80 md:h-40 z-20">
-                      <!-- Corners -->
                       <div class="absolute top-0 left-0 w-10 h-10 border-t-[4px] border-l-[4px] transition-colors duration-300 rounded-tl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute top-0 right-0 w-10 h-10 border-t-[4px] border-r-[4px] transition-colors duration-300 rounded-tr-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 left-0 w-10 h-10 border-b-[4px] border-l-[4px] transition-colors duration-300 rounded-bl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 right-0 w-10 h-10 border-b-[4px] border-r-[4px] transition-colors duration-300 rounded-br-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       
-                      <!-- Scan Line animation -->
                       <div class="absolute left-0 top-0 w-full h-[3px] animate-scan-line" :class="isSuccessScan ? 'bg-green-400 shadow-[0_0_20px_5px_rgba(74,222,128,0.5)]' : 'bg-[#185DC0] shadow-[0_0_15px_3px_rgba(24,93,192,0.6)]'"></div>
                     </div>
                   </div>
@@ -1468,17 +1481,17 @@ onMounted(async () => {
                   "
                 ></video>
 
-                <!-- OCR Scanner Focus Frame -->
+       
                 <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
-                  <!-- Focus Frame with Shadow Overlay -->
+                 
                   <div class="relative w-[85%] h-[60%] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
-                    <!-- Corner Brackets -->
+                
                     <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
                     <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-xl shadow-lg"></div>
                     
-                    <!-- Helper Text -->
+            
                     <div class="absolute -top-12 left-0 right-0 text-center">
                       <span class="bg-[#185DC0] text-white text-[11px] px-4 py-1.5 rounded-full font-bold tracking-widest shadow-xl scale-110">Align text within frame</span>
                     </div>
@@ -1501,7 +1514,7 @@ onMounted(async () => {
                     :loading="isOcrLoading"
                   />
                 </div>
-                <!-- OCR Processing State Overlay -->
+           
                 <div v-if="isOcrLoading" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-30">
                   <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-4"></div>
                   <p class="text-white font-bold">Extracting text...</p>
@@ -1543,13 +1556,31 @@ onMounted(async () => {
                     :value="form.trackingNumber"
                     @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                     :class="[
-                      showTrackingLengthError
-                        ? 'border-red-400 ring-4 ring-red-50'
-                        : ''
+                      (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError || trackingNumberError || duplicateParcelError)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
                     ]"
                   />
+                  <div
+                    v-if="trackingNumberWhitespaceError"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-xs font-medium">Tracking Number cannot contain leading or trailing spaces</div>
+                  </div>
                   <div
                     v-if="showTrackingLengthError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
@@ -1567,7 +1598,7 @@ onMounted(async () => {
                       />
                     </svg>
                     <div class="text-xs font-medium">
-                      Tracking number must be at most 22 characters
+                      <span>Tracking number must be at most 22 characters</span>
                     </div>
                   </div>
                 </div>
@@ -1580,8 +1611,31 @@ onMounted(async () => {
                     v-model="recipientSearch"
                     type="text"
                     placeholder="Enter resident name/ email / room number"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                    :class="[
+                      (recipientNameError || recipientNameLetterError || recipientNameWhitespaceError || error)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
+                    ]"
                   />
+                  <div
+                    v-if="recipientNameWhitespaceError"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-xs font-medium">Recipient Name cannot contain leading or trailing spaces</div>
+                  </div>
 
                   <ul
                     v-if="showSuggestions"
@@ -1627,6 +1681,8 @@ onMounted(async () => {
                     v-model="form.parcelType"
                     :options="parcelTypeOptions"
                     placeholder="Select parcel type"
+                    :error="parcelTypeErrorRequired"
+                    @change="parcelTypeErrorRequired = false"
                   />
                 </div>
 
@@ -1635,7 +1691,7 @@ onMounted(async () => {
                     Status <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="form.status"
+                    :value="mapStatus(form.status)"
                     class="w-full bg-gray-100/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-500 cursor-not-allowed"
                     disabled
                   />
@@ -1647,13 +1703,31 @@ onMounted(async () => {
                     :value="form.senderName"
                     @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                     :class="[
-                      showSenderLengthError || showSenderMinLengthError
-                        ? 'border-red-400 ring-4 ring-red-50'
-                        : ''
+                      (showSenderLengthError || showSenderMinLengthError || SenderNameError || senderNameWhitespaceError)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
                     ]"
                   />
+                  <div
+                    v-if="senderNameWhitespaceError"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-xs font-medium">Sender Name cannot contain leading or trailing spaces</div>
+                  </div>
                   <div
                     v-if="showSenderLengthError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
@@ -1705,6 +1779,8 @@ onMounted(async () => {
                     :options="companyOptions"
                     placeholder="Select company"
                     direction="up"
+                    :error="companyIdError"
+                    @change="companyIdError = false"
                   />
                 </div>
               </div>
@@ -1772,7 +1848,7 @@ onMounted(async () => {
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Status:</span>
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ form.status }}</span>
+                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ mapStatus(form.status) }}</span>
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Company:</span>
@@ -1812,7 +1888,7 @@ onMounted(async () => {
               </div>
 
               <div class="mt-8">
-                <!-- <span class="block text-sm font-bold text-gray-400 mb-4 ml-1">Saved parcels</span> -->
+                
                 <ul class="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                   <li
                     v-for="(p, i) in savedParcels"

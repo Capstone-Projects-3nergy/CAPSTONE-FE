@@ -4,7 +4,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 export const useSidebarManager = defineStore('sidebarManager', () => {
   const isMobile = () => window.innerWidth < 768
   
-  // Use localStorage to persist the state even after refresh, but default to collapsed on mobile
+  
   const storedState = localStorage.getItem('sidebar_collapsed')
   const isCollapsed = ref(storedState === null ? isMobile() : storedState === 'true')
 

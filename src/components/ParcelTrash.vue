@@ -163,6 +163,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'WAITING':
+      return 'Waiting'
     case 'PENDING':
       return 'Pending'
     default:
@@ -691,7 +693,7 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
-// Reset to page 1 whenever filters change to avoid empty pages
+
 watch([searchKeyword, selectedDate, activeTab], () => {
   currentPage.value = 1
 })

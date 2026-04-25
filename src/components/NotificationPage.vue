@@ -77,14 +77,11 @@ const profileManager = useProfileManager()
 
 const updateProfile = async (payload) => {
   try {
-    // 1. update store
     profileManager.updateProfile(payload)
 
-    // 2. sync auth
     loginManager.user.fullName = payload.firstName + ' ' + payload.lastName
     loginManager.user.email = payload.email
 
-    // 3. avatar
     if (payload.avatar) {
       profileManager.updateProfile({ avatar: payload.avatar })
     }
@@ -158,7 +155,6 @@ const displayStatus = (value) => {
   return value.toUpperCase()
 }
 
-// กำหนดสีตามสถานะ
 const statusClass = (value) => {
   const status = displayStatus(value)
 
@@ -204,20 +200,19 @@ const filteredNotifications = computed(() => {
 })
 
 const badgeClass = (item) => {
-  if (item.type === 'overdue') return 'bg-amber-500' // Overdue
-  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' // Parcel
-  return 'bg-green-500' // Announcement
+  if (item.type === 'overdue') return 'bg-amber-500' 
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' 
+  return 'bg-green-500' 
 }
 
 const displayType = (item) => {
   if (item.type === 'announcement' || item.type === 'message') return 'New Announcement'
-  if (item.type === 'overdue') return 'Parcel Overdue'
-  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'New Parcel'
+  if (item.type === 'overdue') return 'Awaiting Collection'
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'Parcel Arrived'
   return item.type || 'Notification'
 }
 
 const badgeIcon = (item) => {
-  // Overdue icon
   if (item.type === 'overdue') {
     return `
       <svg
@@ -237,7 +232,6 @@ const badgeIcon = (item) => {
     `
   }
 
-  // Announcement / Message
   if (!item.parcelId && (item.type === 'announcement' || item.type === 'message')) {
     return `
       <svg
@@ -255,7 +249,6 @@ const badgeIcon = (item) => {
     `
   }
 
-  // Parcel / Notification
   return `
     <svg
       width="25"
@@ -300,7 +293,6 @@ const closeDetail = () => {
   }, 300)
 }
 
-// Pagination Logic
 const currentPage = ref(1)
 const itemsPerPage = 10
 
@@ -681,10 +673,8 @@ const goToPage = (page) => {
         <div
           class="w-full rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
         >
-          <!-- Decor -->
+       
           <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50/50 to-transparent rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
-
-          <!-- Header -->
           <div class="relative z-10 mb-8">
               <div class="flex items-center gap-5">
             <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -741,8 +731,6 @@ const goToPage = (page) => {
             </button>
             </div>
 
-
-          <!-- Notification list -->
           <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
             <div
               v-for="(item, index) in paginatedNotifications"
@@ -751,10 +739,10 @@ const goToPage = (page) => {
               class="group flex items-start gap-4 border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-300 relative overflow-hidden"
             :class="item.isRead === 1 ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
             >
-              <!-- Unread Indicator (Dot only) -->
+              
               <div v-if="item.isRead !== 1" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
 
-              <!-- LEFT ICON -->
+            
               <div class="mt-1 relative">
                 <div 
                   class="absolute inset-0 bg-current opacity-10 rounded-xl blur-sm transform group-hover:scale-110 transition-transform"
@@ -766,8 +754,6 @@ const goToPage = (page) => {
                   v-html="badgeIcon(item)"
                 />
               </div>
-
-              <!-- CONTENT -->
               <div class="flex-1 min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-gray-400 mb-0.5">
                   {{ displayType(item) }}
@@ -777,7 +763,7 @@ const goToPage = (page) => {
                     {{ item.label }}
                   </p>
                   
-                  <!-- TIME & READ STATUS -->
+              
                   <div class="flex flex-col items-end gap-1">
                     <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-white/50 px-2 py-1 rounded-lg">
                       {{ item.time }}
@@ -805,7 +791,7 @@ const goToPage = (page) => {
               </div>
             </div>
             
-            <!-- Empty State -->
+          
             <div v-if="filteredNotifications.length === 0" class="text-center py-12">
               <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

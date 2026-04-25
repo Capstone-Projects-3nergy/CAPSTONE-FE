@@ -16,10 +16,9 @@ export const useResetPasswordManager = defineStore(
       errorMessage.value = ''
 
       try {
-        // Firebase handles email sending
+        
         await sendPasswordResetEmail(auth, email)
 
-        // Optional: notify backend (log / audit)
         const baseURL = import.meta.env.VITE_BASE_URL
         if (baseURL) {
           await axios.post(`${baseURL}/public/auth/reset-password-request`, {
@@ -31,7 +30,7 @@ export const useResetPasswordManager = defineStore(
           '📧 Password reset email has been sent. Please check your inbox.'
       } catch (error) {
         if (error.code === 'auth/user-not-found') {
-          errorMessage.value = '❌ Email not found in the system.'
+          errorMessage.value = 'Email not found in the system.'
         } else {
           errorMessage.value =
             error.response?.data?.message ||
@@ -48,10 +47,10 @@ export const useResetPasswordManager = defineStore(
       errorMessage.value = ''
 
       try {
-        // Firebase resets password
+        
         await confirmPasswordReset(auth, oobCode, newPassword)
 
-        // Optional: notify backend (NO PASSWORD)
+     
         const baseURL = import.meta.env.VITE_BASE_URL
         if (baseURL) {
           await axios.post(`${baseURL}/public/auth/reset-password-success`, {
@@ -59,10 +58,10 @@ export const useResetPasswordManager = defineStore(
           })
         }
 
-        successMessage.value = '✅ Password has been reset successfully!'
+        successMessage.value = 'Password has been reset successfully!'
       } catch (error) {
         if (error.code === 'auth/invalid-action-code') {
-          errorMessage.value = '❌ Reset link is invalid or expired.'
+          errorMessage.value = 'Reset link is invalid or expired.'
         } else {
           errorMessage.value =
             error.response?.data?.message ||

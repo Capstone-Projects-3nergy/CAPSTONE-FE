@@ -6,15 +6,15 @@ export const useUserManager = defineStore('userManager', () => {
   const staffs = reactive([])
   const trash = reactive([])
 
-  /* ---------- helpers ---------- */
+
   const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
 
-  /* ---------- getters ---------- */
+
   const getMembers = () => members
   const getStaffs = () => staffs
   const getTrash = () => trash
 
-  /* ---------- setters ---------- */
+  
   const setMembers = (list = []) => {
     members.length = 0
     ;(Array.isArray(list) ? list : [list]).forEach((m) => members.push(m))
@@ -30,7 +30,7 @@ export const useUserManager = defineStore('userManager', () => {
     ;(Array.isArray(list) ? list : [list]).forEach((t) => trash.push(t))
   }
 
-  /* ---------- add ---------- */
+
   const addMember = (member) => {
     if (!member) return
     members.push(member)
@@ -41,7 +41,7 @@ export const useUserManager = defineStore('userManager', () => {
     staffs.push(staff)
   }
 
-  /* ---------- update ---------- */
+
   const updateMember = (updated) => {
     const index = findIndexById(members, updated.id)
     if (index !== -1) {
@@ -84,14 +84,14 @@ export const useUserManager = defineStore('userManager', () => {
     }
   }
 
-  /* ---------- move to trash ---------- */
+
   const moveMemberToTrash = (id) => {
     const index = findIndexById(members, id)
     if (index !== -1) {
       const removed = members.splice(index, 1)[0]
       trash.push({
         ...removed,
-        role: removed.role || 'RESIDENT', // ✅ ใช้ role เดิม
+        role: removed.role || 'RESIDENT', 
         original: { ...removed },
         deletedAt: new Date().toISOString()
       })
@@ -113,7 +113,7 @@ export const useUserManager = defineStore('userManager', () => {
     }
   }
 
-  /* ---------- restore ---------- */
+ 
   const restoreFromTrash = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
@@ -136,7 +136,7 @@ export const useUserManager = defineStore('userManager', () => {
     }
   }
 
-  /* ---------- delete permanent ---------- */
+
   const deletePermanent = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
@@ -144,7 +144,7 @@ export const useUserManager = defineStore('userManager', () => {
     }
   }
 
-  /* ---------- find ---------- */
+
   const findMemberByEmail = (email) => members.find((m) => m.email === email)
 
   const findStaffByRole = (role) => staffs.filter((s) => s.role === role)

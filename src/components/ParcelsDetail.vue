@@ -50,14 +50,14 @@ const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const parcel = ref(null)
 
-// Real-time update logic
+
 const currentTime = ref(Date.now())
 let timerId = null
 
 onMounted(() => {
   timerId = setInterval(() => {
     currentTime.value = Date.now()
-  }, 10000) // Update every 10 seconds
+  }, 10000) 
 })
 
 onUnmounted(() => {
@@ -67,7 +67,7 @@ onUnmounted(() => {
 const isOverdue = computed(() => {
   if (!parcel.value || !parcel.value.receivedAt) return false
   const status = parcel.value.status?.toUpperCase() || ''
-  if (!['RECEIVED', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
+  if (!['RECEIVED', 'WAITING', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
   const receivedDate = new Date(parcel.value.receivedAt)
   const diffTime = Math.abs(currentTime.value - receivedDate)
   const diffHours = diffTime / (1000 * 60 * 60)
@@ -98,8 +98,6 @@ const overdueTimeDisplay = computed(() => {
 })
 
 const activeTab = ref('info')
-
-// Notification states
 const showNotifyPopup = ref(false)
 const lineAlertStyle = ref('green')
 const isSending = ref(false)
@@ -108,8 +106,6 @@ const notifyError = ref(false)
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
-
-// Reminder Cooldown Logic (1 Day)
 const lastNotifySentTime = ref(null)
 const isNotifyDisabled = computed(() => {
   if (!lastNotifySentTime.value) return false
@@ -163,7 +159,6 @@ const sendNotify = async () => {
   
   isSending.value = true
   try {
-    // If it's overdue, use the remind-overdue api, otherwise use standard notify
     const result = isOverdue.value 
       ? await sendOverdueReminder(parcel.value.parcelId, router)
       : await sendParcelNotification(parcel.value.parcelId, router)
@@ -546,7 +541,6 @@ function formatDateTime(datetimeStr) {
         </div>
 
         <div class="flex flex-col md:flex-row gap-6 items-stretch">
-          <!-- LEFT : Menu Sidebar -->
           <div class="w-full md:w-1/3 flex">
             <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div class="flex flex-col items-center text-center">
@@ -582,8 +576,6 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         </div>
-
-        <!-- RIGHT : Content Area -->
         <div class="w-full md:w-2/3 flex">
             <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div v-if="activeTab === 'info'" class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -680,12 +672,12 @@ function formatDateTime(datetimeStr) {
                       class="w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all duration-500 overflow-hidden"
                       :class="{
                         'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-100': parcel?.status === 'WAITING_FOR_STAFF',
-                        'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED',
+                        'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING',
                         'bg-gradient-to-br from-emerald-400 to-green-600 shadow-green-100': parcel?.status === 'PICKED_UP'
                       }"
                     >
                       <svg v-if="parcel?.status === 'PICKED_UP'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      <svg v-else-if="parcel?.status === 'RECEIVED'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                      <svg v-else-if="parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                       <svg v-else xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                   </div>
@@ -695,13 +687,15 @@ function formatDateTime(datetimeStr) {
                     <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">Overdue</span>
                   </div>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
-                    {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
+                    {{ 
+                      parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 
+                      parcel?.status === 'WAITING_FOR_STAFF' ? 'Waiting for staff to verify with the courier.' : 
+                      'Waiting for resident to pick up.' 
+                    }}
                   </p>
                </div>
 
-               <!-- Send Overdue Reminder UI -->
-               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
-                  <!-- Decorative blur -->
+               <div v-if="parcel?.status !== 'PICKED_UP' && parcel?.status !== 'WAITING_FOR_STAFF' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
                   <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
 
                   <div class="relative z-10">
@@ -738,7 +732,7 @@ function formatDateTime(datetimeStr) {
                         ]"
                       />
                       
-                      <!-- Status Message (Cooldown) -->
+            
                       <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
                         <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-yellow-50 text-yellow-600 px-6 py-2.5 rounded-full border border-yellow-100 shadow-sm">
                            <div class="relative">
@@ -766,7 +760,6 @@ function formatDateTime(datetimeStr) {
     </div>
   </main>
 
-      <!-- Notification Confirmation Modal -->
       <div v-if="showNotifyPopup" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showNotifyPopup = false"></div>
         <div class="relative bg-white rounded-[2.5rem] w-full max-w-md p-10 text-center shadow-2xl animate-in zoom-in-95 duration-300">

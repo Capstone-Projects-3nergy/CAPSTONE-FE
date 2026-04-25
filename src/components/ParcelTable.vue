@@ -68,8 +68,6 @@ const props = defineProps({
 
 const internalPages = computed(() => {
   if (props.totalPages <= 0) return []
-  
-  // If parent component still provides pages prop, use it (for transition)
   if (props.pages && props.pages.length > 0) return props.pages
 
   const pages = []
@@ -316,7 +314,9 @@ const authStore = useAuthManager()
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Tracking:
             </span>
-            {{ p.trackingNumber }}
+            <span>
+              {{ p.trackingNumber || 'Awaiting Staff' }}
+            </span>
           </td>
 
           <td
@@ -324,7 +324,9 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Name:</span>
-            {{ p.recipientName }}
+            <span>
+              {{ p.recipientName || 'Awaiting Staff' }}
+            </span>
           </td>
 
           <td
@@ -367,7 +369,9 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
-            {{ p.roomNumber }}
+            <span>
+              {{ p.roomNumber || 'Awaiting Staff' }}
+            </span>
           </td>
 
           <td
@@ -375,7 +379,9 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Email: </span>
-            {{ p.email }}
+            <span>
+              {{ p.email || 'Awaiting Staff' }}
+            </span>
           </td>
 
           <td
@@ -424,10 +430,10 @@ const authStore = useAuthManager()
                 class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
                 :class="[
                   {
-                    'bg-yellow-50 text-yellow-600': p.status === 'Waiting for Staff' || p.status === 'Pending',
-                    'bg-green-50 text-green-600': p.status === 'Picked Up',
-                    'bg-blue-50 text-blue-600': p.status === 'Received',
-                    'bg-red-50 text-red-600': p.status === 'TRASH'
+                    'bg-yellow-50 text-yellow-600': ['Waiting for Staff', 'Pending', 'WAITING_FOR_STAFF', 'PENDING'].includes(p.status),
+                    'bg-green-50 text-green-600': ['Picked Up', 'PICKED_UP'].includes(p.status),
+                    'bg-blue-50 text-blue-600': ['Received', 'Waiting', 'RECEIVED', 'WAITING'].includes(p.status),
+                    'bg-red-50 text-red-600': ['TRASH', 'Trash'].includes(p.status)
                   },
                   clickableStatus ? 'cursor-pointer ' : 'cursor-default '
                 ]"
@@ -436,7 +442,6 @@ const authStore = useAuthManager()
                 {{ p.status }}
               </span>
 
-              <!-- Tooltip -->
               <div
                 v-if="
                   authStore.user?.role === 'STAFF' &&
@@ -490,7 +495,7 @@ const authStore = useAuthManager()
                 {{ formatStatus(p.status) }}
               </span>
 
-              <!-- Tooltip -->
+             
               <div
                 v-if="
                   authStore.user?.role === 'STAFF' &&
@@ -520,27 +525,6 @@ const authStore = useAuthManager()
             >
             {{ formatDateTime(p.deletedAt) }}
           </td>
-          <!-- <td
-            v-if="showActionStatus"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
-          >
-            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
-
-            <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-              :class="[
-                {
-                  'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE',
-                  'bg-red-400': p.status === 'DELETED',
-                  'bg-yellow-400': p.status === 'PENDING'
-                },
-                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
-              ]"
-            >
-              {{ p.status }}
-            </span>
-          </td> -->
           <td
             v-if="showAction"
             class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-center whitespace-nowrap"
@@ -844,7 +828,7 @@ const authStore = useAuthManager()
     </table>
     </div>
 
-    <!-- Pagination -->
+
     <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
         <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
             <button 
@@ -905,7 +889,7 @@ const authStore = useAuthManager()
   }
 }
 
-/* Tooltip overrides */
+
 .shrink-table-wrapper table td .pointer-events-none > div.bg-gray-400 {
   white-space: nowrap !important;
   word-break: normal !important;

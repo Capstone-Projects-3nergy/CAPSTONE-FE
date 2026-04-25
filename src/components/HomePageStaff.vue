@@ -20,6 +20,41 @@ import { useSidebarManager } from '@/stores/SidebarManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ReportExport from './ReportExport.vue'
+import SelectWeb from './SelectWeb.vue'
+
+const formatDateForInput = (date, view) => {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  
+  if (view === 'monthly') {
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+  } else if (view === 'weekly') {
+    const tempDate = new Date(d.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
+  } else {
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+}
+
+const getDateFromWeek = (weekStr) => {
+  const [year, week] = weekStr.split('-W').map(Number);
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const isoWeekStart = simple;
+  if (dow <= 4)
+    isoWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  else
+    isoWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  return isoWeekStart;
+}
 
 const sidebarManager = useSidebarManager()
 const { isCollapsed } = storeToRefs(sidebarManager)
@@ -27,6 +62,40 @@ const { toggleSidebar } = sidebarManager
 
 
 const reportExportRef = ref(null)
+const selectedReportDate = ref(new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0])
+const reportEndDate = ref(new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0])
+const reportMode = ref('daily')
+
+const maxReportDate = computed(() => {
+  const localNow = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+  return formatDateForInput(localNow, reportMode.value)
+})
+
+const reportModeOptions = [
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Custom Range', value: 'range' }
+]
+
+watch(reportMode, (newMode) => {
+  rangeError.value = false
+  if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+  const localNow = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+  const localDateStr = localNow.toISOString().split('T')[0]
+  
+  if (newMode === 'range') {
+    selectedReportDate.value = ''
+    reportEndDate.value = ''
+  } else if (newMode === 'daily') {
+    selectedReportDate.value = localDateStr
+    reportEndDate.value = localDateStr
+  } else if (newMode === 'weekly') {
+    selectedReportDate.value = formatDateForInput(localNow, 'weekly')
+  } else if (newMode === 'monthly') {
+    selectedReportDate.value = formatDateForInput(localNow, 'monthly')
+  }
+})
 
 const loginManager = useAuthManager()
 const userManager = useUserManager()
@@ -56,9 +125,8 @@ const calculateOverdueHours = (receiveAt) => {
   if (isNaN(receivedAt.getTime())) return 0
   const diffTime = Math.abs(now - receivedAt)
   const totalHours = Math.floor(diffTime / (1000 * 60 * 60))
-  // Return hours past the 24-hour threshold
   const overdueHoursRemaining = totalHours - 24
-  return Math.max(1, overdueHoursRemaining) // Return at least 1 if it's in the list
+  return Math.max(1, overdueHoursRemaining)
 }
 
 const overdueParcelsList = computed(() => {
@@ -68,10 +136,7 @@ const overdueParcelsList = computed(() => {
   
   return [...getMappedParcels.value]
     .filter(p => {
-      // Only check 'Received', 'Notified', or 'Overdue' statuses
-      if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
-      
-      // Use 24 hours for overdue threshold
+      if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
       const receivedDate = new Date(p.receiveAt)
       if (isNaN(receivedDate.getTime())) return false
       return (now - receivedDate) > oneDayMs
@@ -93,18 +158,19 @@ const topResidents = computed(() => {
   getMappedParcels.value.forEach(p => {
     const name = p.residentName || 'Unknown'
     if (!counts[name]) {
-      // Find resident from store members
       const resident = dashboardStore.members.find(m => 
         m.fullName === name || m.residentName === name || `${m.firstName} ${m.lastName}` === name
       )
       
       counts[name] = {
         name,
-        room: p.roomNumber || 'N/A',
+        room: resident?.roomNumber || p.roomNumber || 'Awaiting Staff',
         count: 0,
         photo: resident?.photo || resident?.profileImageUrl || '',
         status: resident?.status || 'Active'
       }
+    } else if (counts[name].room === 'Awaiting Staff' && p.roomNumber) {
+      counts[name].room = p.roomNumber
     }
     counts[name].count++
   })
@@ -134,6 +200,7 @@ const formatResidentStatus = (status) => {
 const getStatusClass = (status) => {
   switch (status) {
     case 'Received':
+    case 'Waiting':
     case 'Notified':
       return 'text-blue-600 bg-blue-50 border-blue-100'
     case 'Waiting for Staff':
@@ -151,7 +218,8 @@ const getStatusClass = (status) => {
 
 const getStatusIconPath = (status) => {
   switch (status) {
-    case 'Received': return 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'
+    case 'Received': 
+    case 'Waiting': return 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'
     case 'Notified': return 'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z'
     case 'Picked Up': return 'M5 13l4 4L19 7'
     case 'Overdue': return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
@@ -159,7 +227,6 @@ const getStatusIconPath = (status) => {
   }
 }
 const showRegistrationDetail = (id) => {
-  // id = user.id (จาก mapped)
   router.push({
     name: 'detailregistration',
     params: {
@@ -185,13 +252,14 @@ const mapStatus = (status) => {
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
-      return 'Received'
+    case 'WAITING':
+    case 'WAIT':
+      return 'Waiting'
     default:
       return status
   }
 }
 
-// const loginStore = useLoginManager()
 const router = useRouter()
 const route = useRoute()
 const showHomePageStaff = ref(false)
@@ -208,8 +276,8 @@ const packagesPerMonth = [
 ]
 
 const currentDate = ref('')
-const dashboardViewTab = ref('activity') // 'activity' | 'status'
-const residentViewTab = ref('growth') // 'growth' | 'status'
+const dashboardViewTab = ref('activity')
+const residentViewTab = ref('growth')
 const hoveredParcelId = ref(null)
 const filterStartDate = ref('')
 const filterEndDate = ref('')
@@ -277,41 +345,48 @@ const openResidentDatePicker = () => {
   }
 }
 
-const formatDateForInput = (date, view) => {
-  if (!date) return ''
-  const d = new Date(date)
-  const year = d.getFullYear()
-  
-  if (view === 'monthly') {
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
-  } else if (view === 'weekly') {
-    // ISO week calculation
-    const tempDate = new Date(d.getTime());
-    tempDate.setHours(0, 0, 0, 0);
-    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
-    const week1 = new Date(tempDate.getFullYear(), 0, 4);
-    const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
+const reportDateInput = ref(null)
+
+const openReportDatePicker = () => {
+  if (reportDateInput.value?.showPicker) {
+    reportDateInput.value.showPicker();
   } else {
-    // daily
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
+    reportDateInput.value?.click();
   }
 }
 
-const getDateFromWeek = (weekStr) => {
-  const [year, week] = weekStr.split('-W').map(Number);
-  const simple = new Date(year, 0, 1 + (week - 1) * 7);
-  const dow = simple.getDay();
-  const isoWeekStart = simple;
-  if (dow <= 4)
-    isoWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
-  else
-    isoWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
-  return isoWeekStart;
+const formatDateDisplay = (dateStr, mode = 'daily') => {
+  if (!dateStr) return '';
+  
+  if (mode === 'monthly') {
+    const [year, month] = dateStr.split('-');
+    const date = new Date(year, month - 1);
+    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  
+  if (mode === 'weekly') {
+    const start = getDateFromWeek(dateStr);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    
+    const startStr = start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const endStr = end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${startStr} - ${endStr}`;
+  }
+
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
 }
+
+const reportEndDateInput = ref(null)
+const openReportEndDatePicker = () => {
+  if (reportEndDateInput.value?.showPicker) {
+    reportEndDateInput.value.showPicker();
+  } else {
+    reportEndDateInput.value?.click();
+  }
+}
+
 
 const handleDateChange = (dateStr, type) => {
   if (!dateStr) return
@@ -345,7 +420,7 @@ const dataLabelsPlugin = {
       meta.data.forEach((bar, index) => {
         const value = dataset.data[index];
         if (value > 0) {
-          ctx.fillStyle = i === 2 ? '#EF4444' : '#111827';
+          ctx.fillStyle = '#111827';
           ctx.font = 'black 10px Inter';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
@@ -393,33 +468,32 @@ const initStatusChart = () => {
   const ctx = document.getElementById('statusChart')
   if (!ctx) return
   
-  // Destroy existing if any
   if (statusChartInstance.value) statusChartInstance.value.destroy()
 
   statusChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Picked Up', 'Received', 'Overdue'],
+      labels: ['Picked Up', 'Waiting', 'Waiting for Staff', 'Overdue'],
       datasets: [{
-        data: [overallStats.value.pickedUpParcels, overallStats.value.awaitingParcels, overallStats.value.overdueParcels],
-        backgroundColor: ['#10B981', '#3b82f6', '#EF4444'], 
+        data: [
+          overallStats.value.pickedUpParcels, 
+          overallStats.value.awaitingParcels, 
+          overallStats.value.waitingForStaffParcels,
+          overallStats.value.overdueParcels
+        ],
+        backgroundColor: ['#10B981', '#3b82f6', '#FACC15', '#EF4444'], 
         borderWidth: 0,
-        hoverOffset: 4
+        hoverOffset: 0
       }]
     },
     options: {
+      events: [],
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)',
-          padding: 12,
-          cornerRadius: 8,
-          callbacks: {
-            label: (context) => ` ${context.label}: ${context.parsed} parcels`
-          }
+          enabled: false
         }
       },
       cutout: '70%'
@@ -441,22 +515,17 @@ const initResidentStatusChart = () => {
         data: [stats.value.activeResidents, stats.value.pendingResidents, stats.value.inactiveResidents],
         backgroundColor: ['#10B981', '#FACC15', '#F97316'], 
         borderWidth: 0,
-        hoverOffset: 4
+        hoverOffset: 0
       }]
     },
     options: {
+      events: [],
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)',
-          padding: 12,
-          cornerRadius: 8,
-          callbacks: {
-            label: (context) => ` ${context.label}: ${context.parsed} residents`
-          }
+          enabled: false
         }
       },
       cutout: '70%'
@@ -464,11 +533,12 @@ const initResidentStatusChart = () => {
   })
 }
 
-watch([() => overallStats.value.pickedUpParcels, () => overallStats.value.awaitingParcels, () => overallStats.value.overdueParcels], () => {
+watch([() => overallStats.value.pickedUpParcels, () => overallStats.value.awaitingParcels, () => overallStats.value.waitingForStaffParcels, () => overallStats.value.overdueParcels], () => {
   if (statusChartInstance.value) {
     statusChartInstance.value.data.datasets[0].data = [
       overallStats.value.pickedUpParcels, 
       overallStats.value.awaitingParcels, 
+      overallStats.value.waitingForStaffParcels,
       overallStats.value.overdueParcels
     ]
     statusChartInstance.value.update()
@@ -530,19 +600,22 @@ const updateParcelChart = () => {
   const data = dashboardStore.chartData;
   let labels = [...data.labels];
   let received = [...data.datasets[0].data];
-  let pickedUp = [...data.datasets[1].data];
+  let staffWaiting = [...data.datasets[1].data];
+  let pickedUp = [...data.datasets[2].data];
+  let overdue = [...data.datasets[3].data];
 
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
-  parcelChartInstance.data.datasets[1].data = pickedUp;
+  parcelChartInstance.data.datasets[1].data = staffWaiting;
+  parcelChartInstance.data.datasets[2].data = pickedUp;
+  parcelChartInstance.data.datasets[3].data = overdue;
   
-  // Calculate and Update Baseline (Average Received)
-  const totalReceived = received.reduce((a, b) => a + b, 0);
+  const totalReceived = received.reduce((a, b) => a + b, 0) + staffWaiting.reduce((a, b) => a + b, 0);
   const avg = totalReceived / (received.length || 1);
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  if (parcelChartInstance.data.datasets.length < 3) {
+  if (parcelChartInstance.data.datasets.length < 5) {
     parcelChartInstance.data.datasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
@@ -555,11 +628,10 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[2].data = new Array(labels.length).fill(avg.toFixed(1));
-    parcelChartInstance.data.datasets[2].label = `Avg (${avg.toFixed(1)})`;
+    parcelChartInstance.data.datasets[4].data = new Array(labels.length).fill(avg.toFixed(1));
+    parcelChartInstance.data.datasets[4].label = `Avg (${avg.toFixed(1)})`;
   }
 
-  // Update bar thickness based on interval
   const interval = dashboardStore.parcelView;
   let thickness = interval === 'monthly' ? 12 : interval === 'daily' ? 32 : 28;
 
@@ -583,7 +655,6 @@ const updateResidentChart = () => {
   residentChartInstance.data.labels = labels;
   residentChartInstance.data.datasets[0].data = data;
   
-  // Update Baseline (Average)
   const totalNewResidents = data.reduce((a, b) => a + b, 0);
   const avg = totalNewResidents / (data.length || 1);
   avgResidentGrowth.value = avg;
@@ -614,8 +685,6 @@ const approveError = ref(false)
 
 const approveResident = async (resident) => {
   try {
-    // Calling API to approve resident by updating status to ACTIVE
-    // We use /api/members as found in other components for member updates
     const body = {
       userId: resident.id,
       status: 'ACTIVE'
@@ -629,7 +698,6 @@ const approveResident = async (resident) => {
     )
 
     if (updatedMember) {
-      // Update local stores and refresh dashboard data
       userManager.updateMember(updatedMember)
       await fetchDashboardData()
       
@@ -655,50 +723,75 @@ const pendingResidentsList = computed(() => {
 
 const fetchDashboardData = async () => {
   try {
-    const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
-    const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
-    const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
+    let parcels = []
+    let residentList = []
+    let staffList = []
+    let announcements = []
+    let dataLoaded = false
 
-    const parcels = Array.isArray(rawParcels) ? rawParcels : []
-    const users = Array.isArray(rawUsers) ? rawUsers : []
-    const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
-
-    // Map users as in ManageResident.vue
-    const mappedUsers = users.map((u) => ({
-      id: u.userId,
-      fullName: u.fullName || '-',
-      email: u.email || '-',
-      dormName: u.dormName || '-',
-      roomNumber: u.roomNumber || '-',
-      role: u.role, // "RESIDENT" | "STAFF"
-      status: u.status,
-      updateAt: u.updatedAt || new Date().toISOString(),
-      photo: u.profileImageUrl
-    }))
-
-    // Separate roles as in ManageResident.vue
-    const residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
-    const staffList = mappedUsers.filter((u) => u.role === 'STAFF')
+    const unifiedLoaded = await dashboardStore.loadDetailedDashboard(router)
     
-    // Sort by latest update as in ManageResident.vue
-    residentList.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+    if (unifiedLoaded && (dashboardStore.parcels.length > 0 || dashboardStore.members.length > 0)) {
+      parcels = [...dashboardStore.parcels]
+      announcements = [...dashboardStore.announcements]
+      
+      const allMembers = dashboardStore.members || []
+      const mappedMembers = allMembers.map(u => ({
+        id: u.userId || u.id,
+        fullName: u.fullName || u.name || '-',
+        email: u.email || '-',
+        dormName: u.dormName || '-',
+        roomNumber: u.roomNumber || '-',
+        role: u.role,
+        status: u.status,
+        updateAt: u.updatedAt || u.updateAt || new Date().toISOString(),
+        photo: u.profileImageUrl || u.photo
+      }))
 
-    // Sync with User Manager store
+      residentList = mappedMembers.filter((u) => u.role === 'RESIDENT' || !u.role)
+      staffList = mappedMembers.filter((u) => u.role === 'STAFF')
+      
+      dataLoaded = true
+    }
+
+    if (!dataLoaded) {
+      const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
+      const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
+      const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
+
+      parcels = Array.isArray(rawParcels) ? rawParcels : []
+      const users = Array.isArray(rawUsers) ? rawUsers : []
+      announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
+
+      const mappedUsers = users.map((u) => ({
+        id: u.userId,
+        fullName: u.fullName || '-',
+        email: u.email || '-',
+        dormName: u.dormName || '-',
+        roomNumber: u.roomNumber || '-',
+        role: u.role,
+        status: u.status,
+        updateAt: u.updatedAt || new Date().toISOString(),
+        photo: u.profileImageUrl
+      }))
+
+      residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
+      staffList = mappedUsers.filter((u) => u.role === 'STAFF')
+    }
+    
+    residentList.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
 
-    // Update Dashboard store for status overview stats with date range
     dashboardStore.calculateDashboardData(
       parcels, 
       residentList, 
       announcements
     )
     
-    // Refresh chart displaying current data
     updateResidentChart()
     updateParcelChart()
     
-    // Also update parcels store for other pages
     if (parcels.length > 0) {
       parcelManager.setParcels(getMappedParcels.value)
     }
@@ -721,21 +814,17 @@ watch([() => dashboardStore.residentView, () => dashboardStore.residentRefDate],
 
 onMounted(async () => {
   window.addEventListener('focus', fetchDashboardData)
-  // sidebarManager.checkScreenSize()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
-  // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
 
-  // Set up periodic polling for fresh stats every 30 seconds
   dashboardInterval = setInterval(() => {
     fetchDashboardData()
   }, 30000)
   const ctx = document.getElementById('parcelChart')
   if (!ctx) return
 
-  // Prevent "Canvas is already in use" error
   const existingParcelChart = Chart.getChart('parcelChart')
   if (existingParcelChart) {
     existingParcelChart.destroy()
@@ -746,11 +835,14 @@ onMounted(async () => {
     plugins: [dataLabelsPlugin, avgLinePlugin],
     data: {
       labels: dashboardStore.chartData.labels,
-      // Filter out Overdue from this graph as per request
       datasets: dashboardStore.chartData.datasets.map(ds => ({
         ...ds,
-        backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)',
-        hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
+        backgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 0.85)' : 
+                        (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 0.85)' :
+                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)')),
+        hoverBackgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 1)' : 
+                             (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 1)' :
+                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)')),
         borderRadius: 4,
         borderSkipped: false,
         barThickness: dashboardStore.currentView === 'daily' ? 12 : 24
@@ -759,6 +851,9 @@ onMounted(async () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: 35, bottom: 0, left: 0, right: 0 }
+      },
       interaction: {
         mode: 'index',
         intersect: false,
@@ -783,13 +878,14 @@ onMounted(async () => {
         },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
           titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
           bodyFont: { family: "'Inter', sans-serif", size: 12 },
           padding: 12,
           cornerRadius: 8,
           boxPadding: 6,
           usePointStyle: true,
+          filter: (item) => !item.dataset.label?.toLowerCase().includes('avg'),
           callbacks: {
             title: (tooltipItems) => {
               const item = tooltipItems[0];
@@ -830,6 +926,7 @@ onMounted(async () => {
           stacked: false,
           beginAtZero: true,
           suggestedMax: 10,
+          grace: '15%',
           grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
           ticks: { 
             font: { family: "'Inter', sans-serif", size: 11 }, 
@@ -850,12 +947,10 @@ onMounted(async () => {
     }
   })
 
-  // Ensure chart reflects current interval data
   updateParcelChart()
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {
-    // Prevent "Canvas is already in use" error
     const existingResidentChart = Chart.getChart('residentChart')
     if (existingResidentChart) {
       existingResidentChart.destroy()
@@ -868,14 +963,14 @@ onMounted(async () => {
         labels: dashboardStore.residentChartData.labels,
         datasets: [
           {
-            label: 'New Residents',
+            label: 'Registered Residents',
             data: dashboardStore.residentChartData.data,
             backgroundColor: (context) => {
               const data = context.dataset.data;
               const max = Math.max(...data);
               return context.parsed.y === max && max > 0
-                ? 'rgba(99, 102, 241, 0.85)' // Indigo peak
-                : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
+                ? 'rgba(99, 102, 241, 0.85)' 
+                : 'rgba(129, 140, 248, 0.4)' 
             },
             hoverBackgroundColor: (context) => {
               const data = context.dataset.data;
@@ -886,13 +981,16 @@ onMounted(async () => {
             },
             borderRadius: 6,
             borderSkipped: false,
-            barThickness: 45 // Increased thickness since we have fewer months
+            barThickness: 45 
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: { top: 35, bottom: 0, left: 0, right: 0 }
+        },
         interaction: {
           mode: 'index',
           intersect: false,
@@ -906,22 +1004,23 @@ onMounted(async () => {
           },
           tooltip: {
             enabled: true,
-            backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+            backgroundColor: 'rgba(17, 24, 39, 0.9)',
             titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
             bodyFont: { family: "'Inter', sans-serif", size: 12 },
             padding: 12,
             cornerRadius: 8,
             boxPadding: 6,
             usePointStyle: true,
+            filter: (item) => !item.dataset.label?.toLowerCase().includes('avg'),
             callbacks: {
               title: (tooltipItems) => {
-                 return `Month: ${tooltipItems[0].label} ${residentYear.value}`;
+                 const refYear = residentYear.value;
+                 const view = activityInterval.value;
+                 return view === 'monthly' ? `Month: ${tooltipItems[0].label} ${refYear}` : `Timeline: ${tooltipItems[0].label}`;
               },
               label: (context) => {
                 const val = context.parsed.y || 0;
-                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + (b || 0), 0);
-                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                return ` ${val} Joined (${pct}%)`;
+                return ` Total: ${val} Residents`;
               }
             }
           }
@@ -942,6 +1041,7 @@ onMounted(async () => {
           y: {
             beginAtZero: true,
             suggestedMax: 5,
+            grace: '15%',
             grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
             ticks: { 
               font: { family: "'Inter', sans-serif", size: 11 }, 
@@ -953,7 +1053,7 @@ onMounted(async () => {
             title: {
                display: true,
                align: 'end',
-               text: 'Residents Joined',
+               text: 'Residents',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
                padding: 0
@@ -962,7 +1062,6 @@ onMounted(async () => {
         }
       }
     })
-    // Explicitly update to apply filtering and baseline on first load
     updateResidentChart()
   }
 })
@@ -1006,10 +1105,45 @@ const showProfileStaffPage = async function () {
 }
 const activeTab = ref('parcel')
 
-const handleExportExcel = () => reportExportRef.value?.handleExportExcel();
+const rangeError = ref(false)
+let rangeErrorTimeout = null
 
-const handleExportPDF = () => reportExportRef.value?.handleExportPDF();
-const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
+const validateReportRange = () => {
+  if (reportMode.value === 'range') {
+    if (!selectedReportDate.value || !reportEndDate.value) {
+      rangeError.value = true
+      if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+      rangeErrorTimeout = setTimeout(() => {
+        rangeError.value = false
+      }, 10000)
+      return false
+    }
+  }
+  rangeError.value = false
+  return true
+}
+
+const handleExportExcel = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handleExportExcel()
+}
+
+const handleExportPDF = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handleExportPDF()
+}
+
+const handlePrintSummary = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handlePrintSummary()
+}
+
+watch([selectedReportDate, reportEndDate], () => {
+  if (rangeError.value) {
+    rangeError.value = false
+    if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+  }
+})
 </script>
 
 <template>
@@ -1028,6 +1162,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
       :announcements="dashboardStore.announcements"
       :parcels="getMappedParcels"
       :members="dashboardStore.members"
+      :selectedDate="selectedReportDate"
+      :endDate="reportEndDate"
+      :mode="reportMode"
     />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
@@ -1038,7 +1175,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
         @closePopUp="closeWelcomePopup"
       />
       
-      <!-- Approval Alerts -->
+
       <AlertPopUp
         v-if="approveSuccess"
         :titles="'The resident is now an active member of the dormitory.'"
@@ -1231,7 +1368,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans overflow-x-hidden">
         <div class="max-w-7xl mx-auto space-y-6">
-               <!-- Header & Actions -->
+
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -1256,7 +1393,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
           </div>
-          <!-- Tabs Navigation (Premium Framed Style) -->
           <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 mt-2">
             <div class="inline-flex p-1 bg-white rounded-2xl border border-gray-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
               <button 
@@ -1297,38 +1433,138 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
           
-          <!-- Export Actions -->
-          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-              <span class="text-sm font-medium text-gray-500">Export:</span>
-              <button 
-                @click="handleExportExcel"
-                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
-                <span class="hidden sm:inline">Export Excel (.xlsx)</span>
-                <span class="sm:hidden">Excel</span>
-              </button>
-              <button 
-                @click="handleExportPDF"
-                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
-                <span class="hidden sm:inline">Export PDF Report</span>
-                <span class="sm:hidden">PDF</span>
-              </button>
+          
+          <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2 px-2 py-3 mt-2 bg-gray-50/30 rounded-2xl border border-gray-100/50">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2">
+
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Filter By:</span>
+                <div class="w-[160px]">
+                  <SelectWeb
+                    v-model="reportMode"
+                    :options="reportModeOptions"
+                    customClass="bg-white border border-gray-200 rounded-xl px-2 h-[40px] hover:border-blue-400 transition-all font-bold text-sm text-[#0E4B90]"
+                  />
+                </div>
+              </div>
+
+      
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Period:</span>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-col relative">
+                    <div class="flex flex-nowrap items-center gap-1.5 sm:gap-2">
+              
+                      <div class="relative flex items-center group">
+                        <div class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer" @click="openReportDatePicker">
+                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100" :class="{'border-red-200 text-red-500': rangeError && !selectedReportDate}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          readonly
+                          :value="formatDateDisplay(selectedReportDate, reportMode)"
+                          :placeholder="reportMode === 'weekly' ? 'Select Week' : (reportMode === 'monthly' ? 'Select Month' : 'DD/MM/YYYY')"
+                          @click="openReportDatePicker"
+                          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-10 sm:pl-13 pr-2 sm:pr-4 py-2 font-bold text-xs sm:text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[130px] sm:w-[210px] min-w-0 flex-1 sm:flex-none cursor-pointer relative z-0"
+                          :class="{'border-red-400 bg-red-50/30 text-red-600 placeholder-red-300': rangeError && !selectedReportDate}"
+                        />
+                        <input
+                          ref="reportDateInput"
+                          :type="reportMode === 'weekly' ? 'week' : (reportMode === 'monthly' ? 'month' : 'date')"
+                          v-model="selectedReportDate"
+                          :max="maxReportDate"
+                          class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                        />
+                      </div>
+
+                   
+                      <template v-if="reportMode === 'range'">
+                        <span class="text-xs font-black text-gray-400 mx-1" :class="{'text-red-500': rangeError && (!selectedReportDate || !reportEndDate)}">to</span>
+                        <div class="relative flex items-center group">
+                          <div class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer" @click="openReportEndDatePicker">
+                            <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100" :class="{'border-red-200 text-red-500': rangeError && !reportEndDate}">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                              </svg>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            readonly
+                            :value="formatDateDisplay(reportEndDate)"
+                            placeholder="DD/MM/YYYY"
+                            @click="openReportEndDatePicker"
+                            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-10 sm:pl-13 pr-2 sm:pr-4 py-2 font-bold text-xs sm:text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[130px] sm:w-[185px] min-w-0 flex-1 sm:flex-none cursor-pointer relative z-0"
+                            :class="{'border-red-400 bg-red-50/30 text-red-600 placeholder-red-300': rangeError && !reportEndDate}"
+                          />
+                          <input
+                            ref="reportEndDateInput"
+                            type="date"
+                            v-model="reportEndDate"
+                            :min="selectedReportDate"
+                            :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
+                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+             
+                    <div v-if="rangeError" class="absolute -bottom-4 left-0 flex items-center text-[10px] text-red-600 font-bold animate-in fade-in slide-in-from-top-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 mr-1">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                      </svg>
+                      Please select both start and end dates for Custom Range.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <button 
-              @click="handlePrintSummary"
-              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              <span class="hidden sm:inline">Print Summary</span>
-              <span class="sm:hidden">Print</span>
-            </button>
+
+            <div class="h-[1px] w-full bg-gray-100 lg:hidden my-2"></div>
+            <div class="h-8 w-[1px] bg-gray-200 hidden lg:block"></div>
+
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Export:</span>
+              <div class="flex flex-wrap items-center gap-2 flex-1">
+                <button 
+                  @click="handleExportExcel"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-green-400 cursor-pointer transition-all shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
+                  <span>XLS</span>
+                </button>
+                <button 
+                  @click="handleExportPDF"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-red-400 cursor-pointer transition-all shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
+                  <span>PDF</span>
+                </button>
+                <button 
+                  @click="handlePrintSummary"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-[#0E4B90] cursor-pointer transition-all shadow-sm"
+                >
+                  <svg class="w-4 h-4 text-[#0E4B90]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                  <span>Print</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Welcome Banner & Date -->
           <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-2 sm:gap-4 transition-all duration-300 hover:shadow-md">
             <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
               <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105 flex-shrink-0">
@@ -1348,18 +1584,18 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
 
-          <!-- Tab Content: Parcel Dashboard -->
+   
           <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
-            <!-- Stats Grid -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            <!-- Picked Up -->
+       
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
+
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-emerald-100 rounded-lg md:rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                  {{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}% success
+                  {{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}% Success Rate
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
@@ -1368,7 +1604,25 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Received (Awaiting) -->
+          
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-amber-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-amber-100 rounded-lg md:rounded-xl text-amber-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 8v4l3 3" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                </div>
+                <span class="text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
+                  {{ overallStats.totalParcels ? Math.round((overallStats.waitingForStaffParcels / overallStats.totalParcels) * 100) : 0 }}% Awaiting Staff
+                </span>
+              </div>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.waitingForStaffParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Waiting for Staff</p>
+              </div>
+            </div>
+
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-blue-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1379,17 +1633,17 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <path d="M12 12l-8 -4.5" />
                   </svg>
                 </div>
-                <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
-                  {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
+                <span class="text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
+                  {{ overallStats.totalParcels ? Math.round(((overallStats.awaitingParcels - overallStats.waitingForStaffParcels) / overallStats.totalParcels) * 100) : 0 }}% Ready for Pickup
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Received</p>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels - overallStats.waitingForStaffParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Waiting</p>
               </div>
             </div>
 
-            <!-- Overdue -->
+          
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-red-100 rounded-lg md:rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1412,7 +1666,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Total Parcels -->
+         
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-indigo-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-indigo-100 rounded-lg md:rounded-xl text-indigo-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1423,7 +1677,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <path d="M12 12l-8-4.5" />
                   </svg>
                 </div>
-                <span class="hidden md:flex items-center text-indigo-500 text-[10px] font-bold bg-indigo-50 px-2 py-1 rounded">
+                <span class="flex items-center text-indigo-500 text-[10px] font-bold bg-indigo-50 px-2 py-1 rounded">
                    Summary
                 </span>
               </div>
@@ -1434,12 +1688,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
 
-          <!-- Integrated Chart Dashboard -->
+       
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
 
-            <!-- Card Header with Tabs -->
-            <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-50 gap-6">
               <div class="flex flex-col">
                 <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                   Analytics Center
@@ -1468,9 +1721,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Card Body -->
+          
             <div class="p-6 md:p-8">
-              <!-- Parcel Activity Tab (Bar Chart) -->
+            
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-4">
@@ -1501,18 +1754,27 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                   </div>
                 
-                <div class="h-[300px] w-full relative">
+                <div class="h-[300px] w-full relative -mt-6">
                   <canvas id="parcelChart"></canvas>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8 border-t border-gray-50">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-8 border-t border-gray-50">
                   <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Picked Up</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Picked Up</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
+                    </div>
+                  </div>
+                  <div class="bg-amber-50/30 p-4 rounded-2xl border border-amber-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3" stroke-width="3" stroke-linecap="round"></path><circle cx="12" cy="12" r="9" stroke-width="2" stroke-linecap="round"></circle></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting for Staff</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.waitingForStaffParcels }}</span>
                     </div>
                   </div>
                   <div class="bg-blue-50/30 p-4 rounded-2xl border border-blue-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
@@ -1520,20 +1782,29 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Received</span>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels - stats.waitingForStaffParcels }}</span>
+                    </div>
+                  </div>
+                  <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Overdue</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Status Distribution Tab (Donut Chart) -->
+            
               <div v-show="dashboardViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
                 <div class="h-[300px] w-full relative flex items-center justify-center">
                   <div class="w-full h-full relative">
                     <canvas id="statusChart"></canvas>
                   </div>
-                  <!-- Enhanced Data Display in Center -->
+               
                   <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
                       <span class="text-xs font-black text-gray-400 tracking-widest mb-1">In System</span>
@@ -1551,7 +1822,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </h4>
                     
                     <div class="space-y-4">
-                      <!-- Picked Up Detail -->
+                  
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-emerald-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform"></div>
@@ -1563,19 +1834,31 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         </div>
                       </div>
                       
-                      <!-- Received Detail -->
+                     
+                      <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                          <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Waiting for Staff</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.waitingForStaffParcels }}</span>
+                          <span class="text-xs font-bold text-yellow-600 px-2 py-0.5 bg-yellow-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.waitingForStaffParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
+                        </div>
+                      </div>
+
+                     
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform"></div>
-                          <span class="text-sm font-bold text-gray-700">Received</span>
+                          <span class="text-sm font-bold text-gray-700">Ready for Pickup</span>
                         </div>
                         <div class="flex items-center gap-4">
-                          <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels }}</span>
-                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels - overallStats.waitingForStaffParcels }}</span>
+                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ overallStats.totalParcels ? Math.round(((overallStats.awaitingParcels - overallStats.waitingForStaffParcels) / overallStats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                       
-                      <!-- Overdue Detail -->
+                     
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-red-500 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform"></div>
@@ -1599,9 +1882,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
 
-          <!-- Charts Grid 2 -->
+          
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-            <!-- Recent Parcels -->
+       
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[450px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
@@ -1612,7 +1895,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </h3>
               </div>
 
-              <!-- List -->
+    
               <div class="space-y-3 flex-1 overflow-y-auto pr-1">
                 <div v-for="parcel in recentParcels.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center border border-blue-50 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 cursor-pointer relative overflow-hidden"
@@ -1620,7 +1903,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   
                   <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
-                  <!-- Left: Icon + Info -->
+               
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
                     <div class="flex-shrink-0">
                       <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100/50 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-inner">
@@ -1632,23 +1915,31 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2 mb-1">
-                        <p class="font-bold text-gray-900 text-[13px] truncate leading-tight group-hover:text-[#0E4B90] transition-colors tracking-tight">{{ parcel.trackingNumber }}</p>
+                        <p :class="['font-bold text-[13px] truncate leading-tight transition-colors tracking-tight', parcel.trackingNumber === 'Awaiting Staff' ? 'text-gray-400' : 'text-gray-900 group-hover:text-[#0E4B90]']">{{ parcel.trackingNumber }}</p>
                         <span :class="['flex-shrink-0 flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-lg border shadow-sm bg-white', getStatusClass(parcel.status)]">
                           {{ parcel.status }}
                         </span>
                       </div>
                       <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-medium text-gray-500 truncate max-w-[120px]">{{ parcel.residentName }}</span>
+                        <span :class="['text-[10px] font-medium truncate max-w-[120px]', parcel.residentName === 'Awaiting Staff' ? 'text-gray-400 font-bold' : 'text-gray-500']">{{ parcel.residentName }}</span>
                         <span class="text-gray-300">•</span>
                         <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400">
                           <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                          Room {{ parcel.roomNumber }}
+                          <span v-if="parcel.roomNumber !== 'Awaiting Staff'">Room </span>
+                          <span :class="parcel.roomNumber === 'Awaiting Staff' ? 'text-gray-400' : ''">{{ parcel.roomNumber }}</span>
                         </div>
+                      </div>
+                     
+                      <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+                        <span class="text-[8px] font-black text-gray-300 uppercase tracking-tighter">History:</span>
+                        <span v-for="(h, i) in parcel.statusHistory.slice(-3)" :key="i" class="text-[8px] bg-gray-50 text-gray-400 px-1 py-0.5 rounded border border-gray-100 whitespace-nowrap">
+                          {{ h.status }}
+                        </span>
                       </div>
                     </div>
                   </div>
                   
-                  <!-- Right: Action -->
+                
                   <div class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-50/20 text-gray-300 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm border border-gray-100 group-hover:border-blue-400 group-hover:scale-110 ml-3 relative z-10">
                     <svg class="w-4 h-4 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -1656,14 +1947,14 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
                 </div>
 
-                <!-- Remaining Count Message -->
+             
                 <div v-if="recentParcels.length > 3" class="text-center py-1 mt-1">
                   <p class="text-[10px] font-semibold text-[#0E4B90] bg-blue-50/40 py-1.5 rounded-lg border border-dashed border-blue-200">
                     {{ (recentParcels.length - 3) > 99 ? '+99' : '+ ' + (recentParcels.length - 3) }} more active parcels
                   </p>
                 </div>
 
-                <!-- Empty State -->
+              
                 <div v-if="recentParcels.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/50 py-10 opacity-40">
                   <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                   <p class="text-xs font-medium">No recent activity</p>
@@ -1675,7 +1966,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Overdue Parcels Section -->
+          
             <div class="bg-red-50/50 rounded-2xl border border-red-200 p-5 flex flex-col h-[450px]">
               <div class="flex items-center gap-3 mb-3">
                 <div class="p-2 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
@@ -1688,23 +1979,22 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
                 <h3 class="text-red-600 font-bold text-base md:text-lg">
                   {{ overdueParcelsList.length }} 
-                  <!-- Overdue Parcels (>1 day) -->
+               
                   Overdue Parcels (>1 day)
                 </h3>
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
               <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-y-auto pr-1">
-                <!-- Overdue Item -->
+             
                 <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center justify-between border border-red-50 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
                      @click="showParcelDetail(parcel.id, 'status')">
                   
-                  <!-- Subtle background accent on hover -->
                   <div class="absolute inset-0 bg-gradient-to-r from-red-50/0 to-red-50/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
-                    <!-- Modern Overdue Badge (Compact) -->
+                 
                     <div class="relative flex-shrink-0">
                       <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 text-red-600 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1720,6 +2010,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                           Room {{ parcel.roomNumber }}
                         </div>
+                      </div>
+                     
+                      <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1">
+                        <span v-for="(h, i) in parcel.statusHistory.slice(-2)" :key="i" class="text-[8px] bg-red-50/50 text-red-300 px-1 py-0.5 rounded border border-red-100/30 whitespace-nowrap">
+                          {{ h.status }}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1740,15 +2036,15 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
                 </div>
                 
-                <!-- Remaining Count Message -->
-                <div v-if="overdueParcelsList.length > 4" class="text-center py-1.5 mt-1">
+        
+                <div v-if="overdueParcelsList.length > 3" class="text-center py-1.5 mt-1">
                   <p class="text-[10px] md:text-xs font-semibold text-red-600 bg-red-50/40 py-2 rounded-lg border border-dashed border-red-200">
-                    {{ (overdueParcelsList.length - 4) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 4) }} more overdue parcels
+                    {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
                   </p>
                 </div>
               </div>
 
-              <!-- Empty State -->
+            
               <div v-else class="flex-1 flex flex-col items-center justify-center py-10 opacity-50">
                 <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mb-3">
                   <svg class="w-8 h-8 text-red-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1758,7 +2054,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <p class="text-xs font-bold text-red-300">No parcel overdue</p>
               </div>
 
-              <!-- View All Button -->
+           
               <div v-if="overdueParcelsList.length > 0" class="mt-auto border-t border-red-100/50 pt-3 text-center">
                 <button @click="showManageParcelPage" class="text-xs font-medium text-red-500 hover:text-red-700 cursor-pointer transition-colors">
                   View all parcels →
@@ -1768,12 +2064,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
           </div>
         </div>
           
-          <!-- Tab Content: Resident Dashboard -->
+       
           <div v-show="activeTab === 'resident'" class="space-y-6 mt-8">
             
-            <!-- Stats Grid -->
+          
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-              <!-- Active Residents -->
+          
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 border border-emerald-100">
@@ -1787,7 +2083,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!--   Pending Accounts -->
+           
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
@@ -1800,7 +2096,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!-- Inactive Residents -->
+          
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
@@ -1813,7 +2109,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!-- Total Residents (Active + Inactive) -->
+           
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 border border-blue-100">
@@ -1827,18 +2123,18 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Integrated Resident Chart Dashboard -->
+          
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600"></div>
 
-              <!-- Card Header with Tabs -->
-              <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+           
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-50 gap-6">
                 <div class="flex flex-col">
                   <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                     Resident Insights
                     <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 tracking-widest">Growth & Status</span>
                   </h3>
-                  <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and member status</p>
+                  <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and resident status</p>
                 </div>
 
                 <div class="flex items-center gap-1 bg-gray-100/60 p-1.5 rounded-2xl w-full sm:w-auto shadow-inner">
@@ -1861,9 +2157,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!-- Card Body -->
+           
               <div class="p-6 md:p-8">
-                <!-- Resident Growth Tab (Bar Chart) -->
+           
                 <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 sm:mb-0">
                     <div class="flex flex-col gap-1">
@@ -1897,28 +2193,28 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
                   
                   <div class="flex items-center gap-3 sm:gap-4 mt-2">
-                     <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ dashboardStore.residentChartData.total }} residents</span>
+                     <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total Residents: {{ dashboardStore.residentChartData.total }}</span>
                      <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                      <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ dashboardStore.residentChartData.peak }}</span>
                      <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                      <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Period: {{ avgResidentGrowth.toFixed(1) }}</span>
                   </div>
                   
-                  <div class="h-[250px] w-full relative">
+                  <div class="h-[300px] w-full relative -mt-6">
                     <canvas id="residentChart"></canvas>
                   </div>
                 </div>
 
-                <!-- Resident Status Tab (Donut Chart) -->
+         
                 <div v-show="residentViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
                   <div class="h-[300px] w-full relative flex items-center justify-center">
                     <div class="w-full h-full relative">
                       <canvas id="residentStatusChart"></canvas>
                     </div>
-                    <!-- Center Display -->
+              
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
-                        <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Members</span>
+                        <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Residents</span>
                         <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalResidents }}</span>
                         <div class="w-8 h-1 bg-emerald-500 rounded-full mt-3"></div>
                       </div>
@@ -1971,12 +2267,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Detailed Grid Row 3 -->
+      
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               
-              <!-- Most Parcels Received -->
+            
               <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden">
-                <!-- Background Accent decoration -->
+           
                 <div class="absolute top-0 right-0 w-48 h-48 bg-yellow-50/50 rounded-full -mr-24 -mt-24 blur-3xl"></div>
 
                 <div class="mb-10 relative z-10">
@@ -2005,7 +2301,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                             <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
                             <span v-else>{{ resident.name.charAt(0) }}</span>
                           </div>
-                          <!-- Ranking Medal Badge -->
+
                           <div :class="[
                             'absolute -top-2 -left-2 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white',
                             index === 0 ? 'bg-yellow-500 text-white' : 
@@ -2039,7 +2335,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       </div>
                     </div>
                     
-                    <!-- Volume Progress Bar (Enhanced) -->
+                 
                     <div class="w-full h-2.5 bg-gray-50 rounded-full overflow-hidden border border-gray-100 shadow-inner p-[1.5px]">
                       <div 
                         class="h-full rounded-full transition-all duration-1000 ease-out"
@@ -2052,7 +2348,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                   </div>
 
-                  <!-- Empty State -->
+                
                   <div v-if="topResidents.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/30 py-20 opacity-40">
                     <svg class="w-20 h-20 mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -2062,7 +2358,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!--   Pending Accounts List -->
+   
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
@@ -2077,7 +2373,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
 
                 <div class="space-y-2 flex-1 overflow-y-auto">
-                  <!-- Dynamic Items -->
+            
                   <div v-for="resident in pendingResidentsList" :key="resident.id" class="bg-white rounded-xl p-3 border border-yellow-100 shadow-sm relative group hover:border-yellow-300 transition-colors">
                     <span class="absolute top-3 right-3 text-[9px] font-bold text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded border border-yellow-200">Pending</span>
                     <div class="flex items-center gap-2.5 mb-2">
@@ -2106,14 +2402,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                   </div>
 
-                  <!-- Remaining Count Message -->
                   <div v-if="stats.pendingResidents > 4" class="text-center py-1">
                     <p class="text-[10px] font-semibold text-yellow-600 bg-yellow-50/50 py-1.5 rounded-lg border border-dashed border-yellow-200">
                       {{ (stats.pendingResidents - 4) > 99 ? '+99' : '+ ' + (stats.pendingResidents - 4) }} more residents awaiting approval
                     </p>
                   </div>
-
-                  <!-- Empty State -->
                   <div v-if="pendingResidentsList.length === 0" class="flex flex-col items-center justify-center h-full text-yellow-600/50 py-10">
                     <div class="w-16 h-16 mb-3 opacity-20">
                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">

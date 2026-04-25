@@ -55,7 +55,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
@@ -69,6 +68,9 @@ const showResidentNameMinLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const isLoading = ref(false)
 const trackingNumberFormatError = ref(false)
+const residentNameWhitespaceError = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const hasWhitespace = (s) => s && (s !== s.trim());
 const form = ref({
   residentName: authStore.user?.fullName ,
   items: [{
@@ -139,8 +141,6 @@ const showNotificationPage = async () => {
 
 
 const showVerifyParcelPage = async () => {
-  // Stay on current page or navigate if needed
-  // Since we are already on ParcelResidentVerification, maybe just ensure state is correct
 }
 
 const currentParcelStatus = computed(() => {
@@ -165,7 +165,6 @@ const getParcelDetail = async (tid) => {
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
-    // Pre-fill form if viewing a specific parcel
     form.value.items[0].trackingNumber = localParcel.trackingNumber
     form.value.residentName = localParcel.recipientName
     form.value.items[0].companyId = localParcel.companyId
@@ -184,7 +183,6 @@ const getParcelDetail = async (tid) => {
       const mapped = mapParcelData(data)
       parcel.value = mapped
       parcelStore.addParcel(mapped)
-       // Pre-fill form
       form.value.items[0].trackingNumber = mapped.trackingNumber
       form.value.residentName = mapped.recipientName
       form.value.items[0].trackingNumber = mapped.trackingNumber
@@ -195,12 +193,10 @@ const getParcelDetail = async (tid) => {
   } catch (err) {}
 }
 
-// Remove checkScreen resize listener logic
 onMounted(async () => {
   const tidNum = Number(route.params.tid)
   await getCompanies()
   if (tidNum) {
-      // Ensure the first item has parcelType initialized if it wasn't
       if (form.value.items[0] && !form.value.items[0].parcelType) {
           form.value.items[0].parcelType = ''
       }
@@ -211,19 +207,39 @@ onMounted(async () => {
 const isNameMismatch = ref(false)
 
 const submitVerification = async () => {
-    // Reset states
     error.value = false
     confirmSuccess.value = false
     errorMessage.value = ''
     isNotFound.value = false
     isNameMismatch.value = false
+    isResidentNameWrong.value = false
+    showResidentNameLengthError.value = false
+    showResidentNameMinLengthError.value = false
+    trackingNumberError.value = false
+    showTrackingLengthError.value = false
+    trackingNumberFormatError.value = false
     let hasNotFound = false
 
     const authStore = useAuthManager()
     const currentUserFullName = authStore.user?.fullName || ''
 
+
+    if (form.value.residentName && hasWhitespace(form.value.residentName)) {
+        residentNameWhitespaceError.value = true
+        setTimeout(() => (residentNameWhitespaceError.value = false), 10000)
+        return
+    }
+
+    for (const item of form.value.items) {
+        if (item.trackingNumber && hasWhitespace(item.trackingNumber)) {
+            trackingNumberWhitespaceError.value = true
+            setTimeout(() => (trackingNumberWhitespaceError.value = false), 10000)
+            return
+        }
+    }
+
     if (form.value.residentName && currentUserFullName) {
-        // Case-insensitive comparison and trimming
+       
         if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {
             isNameMismatch.value = true
             setTimeout(() => isNameMismatch.value = false, 10000)
@@ -266,7 +282,7 @@ const submitVerification = async () => {
     return
   }
     
-    // Explicit number check redundant due to regex above but keeping for flow consistency if user code had it
+    
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
@@ -284,7 +300,7 @@ const submitVerification = async () => {
             return
         }
         
-        // Company Format Validation
+    
         const selectedCompany = companyList.value.find(c => c.companyId === item.companyId)
         if (selectedCompany) {
             const name = selectedCompany.companyName.toLowerCase()
@@ -333,9 +349,7 @@ const submitVerification = async () => {
         const senderName = authStore.user?.fullName || 'Courier'
 
         for (const item of form.value.items) {
-            // -----------------------
-            // payload - simplified (trackingNumber & residentName only)
-            // -----------------------
+          
             const body = {
                 trackingNumber: item.trackingNumber,
                 residentName: form.value.residentName,
@@ -343,16 +357,13 @@ const submitVerification = async () => {
                 parcelType: item.parcelType
             }
 
-            // -----------------------
-            // API call
-            // -----------------------
+           
             const result = await verifyParcelItem(url, body, router)
 
-            // Check if result is success
+        
             if (result && result.success) {
                 successCount++
-                
-                // Construct verified parcel object for store (since backend returns void)
+              
                 const verifiedParcel = {
                     parcelId: `verified-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     trackingNumber: item.trackingNumber,
@@ -368,29 +379,24 @@ const submitVerification = async () => {
                 await notificationStore.notifyParcelSaved(mapped, router)
 
             } else {
-                // Backend returns 500 for unique constraint violation (duplicate)
-                // Treat this as a "soft success" - item is already processed
+            
                 if (result?.status === 500) {
                     duplicateCount++
                 } else {
                     failCount++
-                     // Check for Not Found (404)
                     if (result?.status === 404) {
                         isNotFound.value = true
                     }
                     console.error(`Failed to Add Tracking Number ${item.trackingNumber}:`, result?.message || result?.status)
                     failedItems.push(item.trackingNumber)
-                    nextItems.push(item) // Keep failed item to retry
+                    nextItems.push(item)
                 }
             }
         }
 
-        // Summary handling
-        // Show success if we had any successes OR duplicates (meaning work is done for those)
         if (successCount > 0 || duplicateCount > 0) {
             if (failCount > 0) {
-                // Partial success (some failures)
-                
+              
                 if (hasNotFound) {
                     isNotFound.value = true
                     setTimeout(() => isNotFound.value = false, 10000)
@@ -402,10 +408,8 @@ const submitVerification = async () => {
                     errorMessage.value = `Add Tracking Number failed for ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
                 }
                 
-                // Update form to show only failed items
                 form.value.items = nextItems
             } else {
-                // All success (including duplicates)
                 confirmSuccess.value = true
                 setTimeout(() => {
                   confirmSuccess.value = false
@@ -413,13 +417,12 @@ const submitVerification = async () => {
 
                 errorMessage.value = '' 
                 
-                // Reset form completely
                 form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
             }
 
-            // Auto hide success msg is handled above
+           
         } else if (failCount > 0) {
-            // All failed (no successes, no duplicates)
+           
             
             if (hasNotFound) {
                 isNotFound.value = true
@@ -439,7 +442,7 @@ const submitVerification = async () => {
         setTimeout(() => {
           error.value = false
         }, 10000)
-        errorMessage.value = 'An unexpected error occurred.'
+        errorMessage.value = 'There is a problem. Please try again later.'
     } finally {
         isLoading.value = false
     }
@@ -576,6 +579,10 @@ const handleResidentNameInput = (event) => {
       showResidentNameLengthError.value = false
     }
   }
+  isResidentNameWrong.value = false
+  showResidentNameMinLengthError.value = false
+  isNameMismatch.value = false
+  residentNameWhitespaceError.value = false
 }
 
 const handleTrackingInput = (event, index) => {
@@ -586,7 +593,6 @@ const handleTrackingInput = (event, index) => {
     if (index !== undefined) {
        form.value.items[index].trackingNumber = sliced
     } else {
-       // fallback if referenced directly (though likely used in v-for)
        form.value.items[0].trackingNumber = sliced
     }
     event.target.value = sliced
@@ -602,6 +608,9 @@ const handleTrackingInput = (event, index) => {
       showTrackingLengthError.value = false
     }
   }
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
 }
 
 </script>
@@ -787,13 +796,21 @@ const handleTrackingInput = (event, index) => {
           </div>
         </div>
 
-        <div class="fixed top-5 left-5 z-50">
+        <div class="fixed top-5 left-5 z-[100]">
           <AlertPopUp
             v-if="confirmSuccess"
             :titles="'Add Tracking Number Successful.'"
             message="Success!!"
             styleType="green"
             operate="confirmSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="trackingNumberFormatError"
+            :titles="'Tracking Number format is incorrect for the selected company.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumberFormat"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -804,47 +821,40 @@ const handleTrackingInput = (event, index) => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="isResidentNameWrong"
+            :titles="'Resident Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="nametypewrong"
+            @closePopUp="closePopUp"
+          /> 
+          <AlertPopUp
+            v-if="trackingNumberError"
+            :titles="'Tracking Number must contain only A–Z, 0–9 and no leading/trailing spaces. Thai characters are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumber"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNotFound"
+            :titles="'Add Tracking Number failed. Parcel record does not exist.'"
+            message="Error!!"
+            styleType="red"
+            operate="notFound"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNameMismatch"
+            :titles="'Resident Name must match your account name.'"
+            message="Error!!"
+            styleType="red"
+            operate="nameMismatch"
+            @closePopUp="closePopUp"
+          />
         </div>
-        <AlertPopUp
-          v-if="isResidentNameWrong"
-          :titles="'Resident Name can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="nametypewrong"
-          @closePopUp="closePopUp"
-        /> 
-        <AlertPopUp
-          v-if="trackingNumberError"
-          :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
-          message="Error!!"
-          styleType="red"
-          operate="trackingNumber"
-          @closePopUp="closePopUp"
-        />
-    <AlertPopUp
-      v-if="isNotFound"
-      :titles="'Add Tracking Number failed. Parcel record does not exist.'"
-      message="Error!!"
-      styleType="red"
-      operate="notFound"
-      @closePopUp="closePopUp"
-    />
-    <AlertPopUp
-      v-if="isNameMismatch"
-      :titles="'Resident Name must match your account name.'"
-      message="Error!!"
-      styleType="red"
-      operate="nameMismatch"
-      @closePopUp="closePopUp"
-    />
-    <AlertPopUp
-      v-if="trackingNumberFormatError"
-      :titles="'Tracking Number format is incorrect for the selected company.'"
-      message="Error!!"
-      styleType="red"
-      operate="trackingNumberFormat"
-      @closePopUp="closePopUp"
-    />
+
         <div class="max-w-4xl mx-auto mt-6">
           <div
             class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
@@ -874,7 +884,60 @@ const handleTrackingInput = (event, index) => {
 
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
               <div class="space-y-6">
-             
+                <div class="space-y-2">
+                  <div class="flex items-center ml-1">
+                    <label class="block text-sm font-semibold transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch) ? 'text-red-500' : 'text-gray-700'">Resident Name</label>
+                    <span class="text-red-500 ml-1">*</span>
+                  </div>
+                  <div class="relative group">
+                    <div class="relative">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                        </svg>
+                      </div>
+                      <input
+                        v-model="form.residentName"
+                        @input="handleResidentNameInput"
+                        type="text"
+                        placeholder="Enter your full name"
+                        class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                        :class="[
+                          (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError)
+                            ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                            : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                        ]"
+                      />
+                    </div>
+                    <div
+                      v-if="residentNameWhitespaceError"
+                      class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="w-4 h-4 mr-1.5"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <div class="text-xs font-medium">Full Name cannot contain leading or trailing spaces</div>
+                    </div>
+                    <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      <span v-if="isResidentNameWrong">Resident Name can only be text.</span>
+                      <span v-else-if="showResidentNameLengthError">Maximum 50 characters exceeded.</span>
+                      <span v-else-if="showResidentNameMinLengthError">Minimum 6 characters required.</span>
+                      <span v-else-if="isNameMismatch">Name mismatch with account.</span>
+                    </p>
+                  </div>
+                </div>
                 <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-2xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
                   <div class="absolute top-4 right-4" v-if="form.items.length > 1">
                     <button @click="removeParcelItem(index)" type="button" class="text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full shadow-sm border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer">
@@ -885,74 +948,104 @@ const handleTrackingInput = (event, index) => {
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tracking Number -->
+                   
                     <div class="col-span-1 md:col-span-2 space-y-2">
                       <div class="flex items-center ml-1">
-                        <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+                        <label class="block text-sm font-semibold transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-700'">Tracking Number</label>
                         <span class="text-red-500 ml-1">*</span>
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 transition-colors" :class="showTrackingLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                           <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
+                            </svg>
+                          </div>
+                          <input
+                            v-model="item.trackingNumber"
+                            @input="handleTrackingInput($event, index)"
+                            type="text"
+                            placeholder="Enter tracking number"
+                            class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                            :class="[
+                              (trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
+                                ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                                : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                            ]"
+                          />
                         </div>
-                        <input
-                          :value="item.trackingNumber"
-                          @input="handleTrackingInput($event, index)"
-                          type="text"
-                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
-                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
-                          placeholder="Enter tracking number"
-                        />
+                        <div
+                          v-if="trackingNumberWhitespaceError"
+                          class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="w-4 h-4 mr-1.5"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          <div class="text-xs font-medium">Tracking Number cannot contain leading or trailing spaces</div>
+                        </div>
                          <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
-                          Tracking number max 22 characters
+                          <span v-if="showTrackingLengthError">Tracking number max 22 characters</span>
                         </p>
                       </div>
                     </div>
 
-                    <!-- Parcel Type (Optional) -->
+                   
                     <div class="space-y-2">
                        <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold text-gray-700">Parcel Type (Optional)</label>
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
+                            </svg>
+                          </div>
+                          <SelectWeb
+                            v-model="item.parcelType"
+                            :options="parcelTypeOptions"
+                            placeholder="Select parcel type"
+                            class="pl-10"
+                          />
                         </div>
-                        <SelectWeb
-                          v-model="item.parcelType"
-                          :options="parcelTypeOptions"
-                          placeholder="Select parcel type"
-                          class="pl-10"
-                        />
                       </div>
                     </div>
 
-                    <!-- Company -->
+                   
                     <div class="space-y-2">
                       <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
-                        <!-- <span class="text-red-500 ml-1">*</span> -->
+                       
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                             <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                             <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                               <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                               <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
+                            </svg>
+                          </div>
+                          <SelectWeb
+                            v-model="item.companyId"
+                            :options="companyOptions"
+                            :error="trackingNumberFormatError"
+                            @change="trackingNumberFormatError = false"
+                            placeholder="Select company"
+                            class="pl-10"
+                          />
                         </div>
-                        <SelectWeb
-                          v-model="item.companyId"
-                          :options="companyOptions"
-                          placeholder="Select company"
-                          class="pl-10"
-                        />
                       </div>
                     </div>
 
@@ -960,7 +1053,7 @@ const handleTrackingInput = (event, index) => {
                   </div>
                 </div>
 
-                <!-- Add Button -->
+               
                 <button
                   @click="addParcelItem"
                   type="button"

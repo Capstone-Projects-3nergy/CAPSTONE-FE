@@ -18,7 +18,7 @@ const userInitial = computed(() =>
 const props = defineProps({
   align: {
     type: String,
-    default: 'right' // 'right' aligns right edge (pops left), 'left' aligns left edge (pops right)
+    default: 'right' 
   },
   manualTrigger: {
     type: Boolean,
@@ -71,7 +71,6 @@ const handleMouseLeave = () => {
 const closeDropdown = () => {
   showDropdown.value = false
 }
-// Existing profile image preview logic...
 const profileImageUrlPreview = computed(() => {
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
@@ -153,7 +152,7 @@ defineExpose({
 </script>
 <template>
   <div class="relative">
-    <!-- Main Avatar Circle -->
+  
     <div
       ref="triggerRef"
       class="flex items-center justify-center group"
@@ -179,33 +178,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Quick Info Hover Tooltip 
-    <teleport to="body">
-      <transition
-        enter-active-class="transition ease-out duration-200"
-        enter-from-class="opacity-0 translate-y-2 scale-95"
-        enter-to-class="opacity-100 translate-y-0 scale-100"
-        leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100 translate-y-0 scale-100"
-        leave-to-class="opacity-0 translate-y-2 scale-95"
-      >
-        <div
-          v-if="showHoverInfo && !showDropdown"
-          class="fixed bg-[#1D355E]/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-xl border border-white/10 z-[70] pointer-events-none flex flex-col min-w-[120px]"
-          :style="align === 'left' ? { 
-            top: `${popoverStyle.rowCenter - (windowWidth < 640 ? 40 : 22)}px`, 
-            left: `${popoverStyle.left}px` 
-          } : {}"
-          :class="align === 'right' ? 'absolute right-0 top-14 items-end text-right' : 'items-start text-left'"
-        >
-          <p class="font-bold text-xs text-white leading-none mb-1">{{ userName }}</p>
-          <p class="text-[9px] text-blue-200 font-medium tracking-wide opacity-80">{{ userEmail }}</p>
-        </div>
-      </transition>
-    </teleport>
-    -->
-
-    <!-- Detailed Dropdown Menu -->
     <teleport to="body">
       <transition
         enter-active-class="transition ease-out duration-200"
@@ -224,16 +196,15 @@ defineExpose({
         } : {}"
         :class="align === 'right' ? 'absolute right-0 mt-4 w-72' : 'w-[240px] sm:w-[260px] mx-0'"
       >
-        <!-- Dropdown Header & Content Container -->
+       
         <div class="flex flex-col max-h-[90vh] overflow-y-auto">
           
-          <!-- Profile Section (Avatar + Basic Info) -->
+    
           <div 
             class="relative flex flex-col items-center bg-gradient-to-b from-gray-50/50 to-white transition-all px-4 py-4 text-center border-b border-gray-100"
           >
-            <!-- (Close button removed from here) -->
             
-            <!-- Avatar -->
+
             <div class="relative mb-2 group/avatar">
               <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-2 ring-white">
                 <div class="w-full h-full rounded-full overflow-hidden relative">
@@ -254,7 +225,7 @@ defineExpose({
             </template>
           </div>
 
-          <!-- Menu Actions Section -->
+         
           <div class="flex-1 p-2 bg-white flex flex-col justify-center gap-1">
             <button
               class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group"
@@ -297,7 +268,6 @@ defineExpose({
     </transition>
     </teleport>
 
-    <!-- Overlay Close Background -->
     <teleport to="body">
       <div
         v-if="showDropdown"

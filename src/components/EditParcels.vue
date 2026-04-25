@@ -62,7 +62,10 @@ const trackingNumberError = ref(false)
 const trackingNumberFormatError = ref(false)
 const trackingNumberRequired = ref(false)
 const recipientNameRequired = ref(false)
-const whitespaceError = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const recipientNameWhitespaceError = ref(false)
+const senderNameWhitespaceError = ref(false)
+const hasWhitespace = (s) => s && (s !== s.trim());
 
 
 const parcelTypeOptions = [
@@ -85,6 +88,12 @@ const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberRequired.value = false
+  trackingNumberWhitespaceError.value = false
+  duplicateParcelError.value = false
+
   if (val.length > 22) {
     const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
@@ -100,6 +109,10 @@ const handleTrackingInput = (event) => {
 
 const handleRecipientInput = (event) => {
   const val = event.target.value
+  recipientNameError.value = false
+  recipientNameRequired.value = false
+  recipientNameWhitespaceError.value = false
+
   if (val.length > 50) {
     const sliced = val.slice(0, 50)
     form.value.recipientName = sliced
@@ -115,6 +128,10 @@ const handleRecipientInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
+  SenderNameError.value = false
+  showSenderMinLengthError.value = false
+  senderNameWhitespaceError.value = false
+
   if (val.length > 100) {
     const sliced = val.slice(0, 100)
     form.value.senderName = sliced
@@ -155,15 +172,20 @@ const showParcelTrashPage = async function () {
 }
 const statusOptions = computed(() => {
   let options = []
-  if (form.value.status === 'WAITING_FOR_STAFF') {
+  const s = originalForm.value.status?.toUpperCase() || ''
+
+  if (s === 'WAITING_FOR_STAFF') {
     options = ['WAITING_FOR_STAFF', 'RECEIVED']
-  } else if (form.value.status === 'RECEIVED') {
+  } else if (s === 'RECEIVED') {
     options = ['RECEIVED', 'PICKED_UP']
-  } else if (form.value.status === 'PICKED_UP') {
+  } else if (s === 'WAITING') {
+    options = ['WAITING', 'PICKED_UP']
+  } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['RECEIVED', 'PICKED_UP']
+    options = ['WAITING', 'PICKED_UP']
   }
+  
   return options.map((s) => ({
     label: formatStatus(s),
     value: s
@@ -324,6 +346,19 @@ const filteredResidents = computed(() => {
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
+  selectName.value = false
+  trackingNumberRequired.value = false
+  recipientNameRequired.value = false
+  trackingNumberWhitespaceError.value = false
+  recipientNameWhitespaceError.value = false
+  senderNameWhitespaceError.value = false
+  SenderNameError.value = false
+  recipientNameError.value = false
+  trackingNumberError.value = false
+  showSenderMinLengthError.value = false
+  duplicateParcelError.value = false
+  trackingNumberFormatError.value = false
+
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
     selectName.value = true
     setTimeout(() => (selectName.value = false), 10000)
@@ -340,14 +375,16 @@ const saveEditParcel = async () => {
     return
   }
 
-  // Whitespace check
-  if (
-    !form.value.trackingNumber.trim() ||
-    !form.value.recipientName.trim() ||
-    (form.value.senderName && !form.value.senderName.trim())
-  ) {
-    whitespaceError.value = true
-    setTimeout(() => (whitespaceError.value = false), 10000)
+  trackingNumberWhitespaceError.value = hasWhitespace(form.value.trackingNumber)
+  recipientNameWhitespaceError.value = hasWhitespace(form.value.recipientName)
+  senderNameWhitespaceError.value = hasWhitespace(form.value.senderName)
+
+  if (trackingNumberWhitespaceError.value || recipientNameWhitespaceError.value || senderNameWhitespaceError.value) {
+    setTimeout(() => {
+      trackingNumberWhitespaceError.value = false
+      recipientNameWhitespaceError.value = false
+      senderNameWhitespaceError.value = false
+    }, 10000)
     return
   }
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName)) {
@@ -832,7 +869,7 @@ function formatDateTime(datetimeStr) {
           />
           <AlertPopUp
             v-if="trackingNumberError"
-       :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+       :titles="'Tracking Number must contain only A–Z, 0–9 and no leading/trailing spaces. Thai characters are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="trackingNumber"
@@ -902,22 +939,16 @@ function formatDateTime(datetimeStr) {
             operate="duplicateParcel"
             @closePopUp="closePopUp"
           /> 
-          <AlertPopUp
-            v-if="trackingNumberFormatError"
-            :titles="'Tracking Number format is incorrect for the selected company.'"
-            message="Error!!"
-            styleType="red"
-            operate="trackingNumberFormat"
-            @closePopUp="closePopUp"
+
+
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
+              @closePopUp="closePopUp"
             />
-          <AlertPopUp
-            v-if="whitespaceError"
-            :titles="'Please enter valid text. Spaces only are not allowed.'"
-            message="Error!!"
-            styleType="red"
-            operate="whitespaceError"
-            @closePopUp="closePopUp"
-          />
         </div>
         <form
           class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
@@ -935,13 +966,17 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.trackingNumber"
                   @input="handleTrackingInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    showTrackingLengthError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                    (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError || trackingNumberError || trackingNumberRequired || duplicateParcelError)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
+                <div v-if="trackingNumberWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showTrackingLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"
@@ -959,7 +994,7 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Tracking number must be at most 22 characters
+                    <span>Tracking number must be at most 22 characters</span>
                   </div>
                 </div>
               </div>
@@ -969,13 +1004,17 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.recipientName"
                   @input="handleRecipientInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    showRecipientLengthError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                    (showRecipientLengthError || recipientNameWhitespaceError || recipientNameError || recipientNameRequired)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
+                <div v-if="recipientNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showRecipientLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"
@@ -1003,13 +1042,17 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.senderName"
                   @input="handleSenderInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    showSenderLengthError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                    (showSenderLengthError || senderNameWhitespaceError || showSenderMinLengthError || SenderNameError)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
+                <div v-if="senderNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showSenderLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"
@@ -1059,6 +1102,8 @@ function formatDateTime(datetimeStr) {
                   :options="parcelTypeOptions"
                   placeholder="Select parcel type"
                   class="w-[240px]"
+                  :error="parcelTypeError"
+                  @change="parcelTypeError = false"
                 />
               </div>
               <div>
@@ -1068,6 +1113,8 @@ function formatDateTime(datetimeStr) {
                   v-model="form.companyId"
                   :options="companyOptions"
                   placeholder="Select company"
+                  :error="companyIdError"
+                  @change="companyIdError = false"
                 />
               </div>
             </div>
@@ -1086,7 +1133,13 @@ function formatDateTime(datetimeStr) {
                 type="text"
                 v-model="recipientSearch"
                 placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white outline-none shadow-sm hover:border-blue-200"
+                class="md:w-[325px] w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none shadow-sm hover:border-blue-200"
+                :class="[
+                  selectName
+                    ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                    : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
+                ]"
+                @input="selectName = false"
                 :disabled="form.status === 'PICKED_UP'"
               />
 
@@ -1187,7 +1240,7 @@ function formatDateTime(datetimeStr) {
                 <SelectWeb
                   v-model="form.status"
                   :options="statusOptions"
-                  :disabled="form.status === 'PICKED_UP'"
+                  :disabled="originalForm.status === 'PICKED_UP'"
                   class="w-[240px]"
                 />
 
@@ -1202,7 +1255,7 @@ function formatDateTime(datetimeStr) {
                     You can only update the status in order: 
                     <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                     <span class="mx-1 opacity-40">→</span> 
-                    <span class="text-[#0E4B90] font-bold">Received</span> 
+                    <span class="text-[#0E4B90] font-bold">Waiting</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Picked Up</span>
                   </p>

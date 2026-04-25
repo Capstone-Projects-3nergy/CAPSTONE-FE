@@ -2,30 +2,18 @@ import { reactive, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useProfileManager = defineStore('profileManager', () => {
-  // ------------------------
-  // state
-  // ------------------------
-  const profiles = reactive([]) // profile list
-  const trash = reactive([]) // deleted profiles
+  const profiles = reactive([]) 
+  const trash = reactive([]) 
 
   const loading = ref(false)
   const error = ref(false)
 
-  // ------------------------
-  // helpers
-  // ------------------------
   const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
-
-  // ------------------------
-  // getters
-  // ------------------------
+  
   const getProfiles = () => profiles
   const getProfileById = (id) => profiles.find((p) => p.id === id) || null
   const getTrash = () => trash
 
-  // ------------------------
-  // setters
-  // ------------------------
   const setProfiles = (profileList = []) => {
     profiles.length = 0
     const list = Array.isArray(profileList) ? profileList : [profileList]
@@ -38,9 +26,6 @@ export const useProfileManager = defineStore('profileManager', () => {
     list.forEach((t) => trash.push(t))
   }
 
-  // ------------------------
-  // CRUD (เหมือน parcel)
-  // ------------------------
   const addProfile = (newProfile) => {
     if (!newProfile) return
     profiles.push(newProfile)

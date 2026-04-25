@@ -40,7 +40,7 @@ const props = defineProps({
   },
   mode: {
     type: String,
-    default: 'edit' // 'edit' | 'add'
+    default: 'edit' 
   },
   title: { type: String, default: 'Edit Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -75,6 +75,25 @@ const showPositionMinLengthError = ref(false)
 const showNameLengthError = ref(false)
 const showNameMinLengthError = ref(false)
 
+const showFirstNameWhitespaceError = ref(false)
+const showLastNameWhitespaceError = ref(false)
+const showEmailWhitespaceError = ref(false)
+const showRoomWhitespaceError = ref(false)
+const showLineIdWhitespaceError = ref(false)
+const showPositionWhitespaceError = ref(false)
+const showPhoneWhitespaceError = ref(false)
+
+const showFirstNameError = ref(false)
+const showLastNameError = ref(false)
+const showEmailError = ref(false)
+const showRoomNumberError = ref(false)
+const showDormIdError = ref(false)
+const showPositionError = ref(false)
+const showPhoneError = ref(false)
+const showLineIdError = ref(false)
+
+const hasWhitespace = (s) => s && (s !== s.trim());
+
 const handleEmailInput = (event) => {
   const val = event.target.value
   if (val.length > MAX_EMAIL_LENGTH) {
@@ -87,6 +106,9 @@ const handleEmailInput = (event) => {
     }, 10000)
   } else {
     form.value.email = val
+    showEmailError.value = false
+    showEmailLengthError.value = false
+    showEmailWhitespaceError.value = false
   }
 }
 
@@ -102,6 +124,9 @@ const handleRoomInput = (event) => {
     }, 10000)
   } else {
     form.value.roomNumber = val
+    showRoomNumberError.value = false
+    showRoomLengthError.value = false
+    showRoomWhitespaceError.value = false
   }
 }
 
@@ -120,6 +145,9 @@ const handlePhoneInput = (event) => {
     }, 10000)
   } else {
     form.value.phoneNumber = val
+    showPhoneError.value = false
+    showPhoneLengthError.value = false
+    showPhoneWhitespaceError.value = false
   }
 }
 
@@ -135,6 +163,9 @@ const handleLineIdInput = (event) => {
     }, 10000)
   } else {
     form.value.lineId = val
+    showLineIdError.value = false
+    showLineIdLengthError.value = false
+    showLineIdWhitespaceError.value = false
   }
 }
 
@@ -150,6 +181,10 @@ const handlePositionInput = (event) => {
     }, 10000)
   } else {
     form.value.position = val
+    showPositionError.value = false
+    showPositionLengthError.value = false
+    showPositionMinLengthError.value = false
+    showPositionWhitespaceError.value = false
   }
 }
 
@@ -167,6 +202,10 @@ const handleFirstNameInput = (event) => {
     }, 10000)
   } else {
     form.value.firstName = val
+    showFirstNameError.value = false
+    showNameLengthError.value = false
+    showNameMinLengthError.value = false
+    showFirstNameWhitespaceError.value = false
   }
 }
 
@@ -184,6 +223,10 @@ const handleLastNameInput = (event) => {
     }, 10000)
   } else {
     form.value.lastName = val
+    showLastNameError.value = false
+    showNameLengthError.value = false
+    showNameMinLengthError.value = false
+    showLastNameWhitespaceError.value = false
   }
 }
 
@@ -308,19 +351,12 @@ onMounted(async () => {
     if (props.mode === 'add') {
       return
     }
-    // -------------------------
-    // 2. โหลด profile
-    // -------------------------
     const profile = await getProfile(`${baseURL}/api/profile`, router)
 
     if (!profile) return
 
     profileManager.setCurrentProfile(profile)
 
-    // -------------------------
-    // 3. หา dormName จาก dormId
-    // -------------------------
-    // const dorm = dormList.value.find((d) => d.dormId === profile.dormId)
     const dormName = computed(() => {
       if (!loginManager.user?.dormId) return ''
 
@@ -331,11 +367,9 @@ onMounted(async () => {
       return dorm ? dorm.dormName : ''
     })
     if (props.mode === 'add') {
-      return // ⛔ ห้ามโหลด profile ต่อ
+      return 
     }
-    // -------------------------
-    // 4. set ค่าเริ่มต้นให้ form
-    // -------------------------
+
     if (props.editResidentDetail) {
       Object.assign(form.value, {
         userId: props.userId,
@@ -351,7 +385,6 @@ onMounted(async () => {
       return
     }
 
-    // ✅ แก้ profile login เท่านั้น
     if (props.editProfile) {
       const profile = await getProfile(
         `${import.meta.env.VITE_BASE_URL}/api/profile`,
@@ -381,7 +414,6 @@ onMounted(async () => {
   }
 })
 
-// ✅ Sync form with store when profile is updated (e.g. after LINE linking)
 watch(
   () => profileManager.currentProfile,
   (newProfile) => {
@@ -392,7 +424,6 @@ watch(
   { deep: true, immediate: true }
 )
 
-// ✅ เพิ่ม watch ที่ loginManager ด้วยเพื่อความชัวร์
 watch(
   () => loginManager.user?.lineId,
   (newLineId) => {
@@ -406,7 +437,7 @@ watch(
   () => [props.mode, props.dormName, dormList.value],
   ([mode, dormName]) => {
     if (mode !== 'edit') return
-    if (form.value.dormId) return // ⭐ สำคัญ
+    if (form.value.dormId) return
     if (!dormName || !dormList.value.length) return
 
     const dorm = dormList.value.find((d) => d.dormName === dormName)
@@ -415,7 +446,6 @@ watch(
   { immediate: true }
 )
 
-// load props → form
 watch(
   () => props.mode,
   (mode) => {
@@ -432,7 +462,7 @@ watch(
       form.value.roomNumber = props.roomNumber
       form.value.lineId = props.lineId
       form.value.phoneNumber = props.phoneNumber
-      // form.value.dormName = props.dormName
+      form.value.dormName = props.dormName
     }
   },
   { immediate: true }
@@ -456,24 +486,20 @@ const isFormEmpty = computed(() => {
 })
 
 const profileImageUrlPreview = computed(() => {
-  // ⭐ ADD MODE : ไม่ดึงรูปเก่าเด็ดขาด
   if (props.mode === 'add') {
     if (newAvatar.value) {
       return URL.createObjectURL(newAvatar.value)
     }
     return ''
   }
-  // 1️⃣ รูปใหม่
+
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
   }
-
-  // 2️⃣ แก้ resident → ใช้รูปจาก props
   if (props.editResidentDetail && props.profileImage) {
     return props.profileImage
   }
 
-  // 3️⃣ แก้ profile login
   if (props.editProfile) {
     const url = profileManager.currentProfile?.profileImageUrl
     if (url && url.startsWith('http')) return url
@@ -499,19 +525,16 @@ function onImageChange(e) {
       return
     }
 
-    // Open Cropper
     tempImageSrc.value = URL.createObjectURL(file)
     showCropper.value = true
-    e.target.value = null // Reset input to allow re-selecting same file
+    e.target.value = null
   }
 }
 
 function onCrop(blob) {
-  // Convert blob to File
   const file = new File([blob], "avatar.jpg", { type: "image/jpeg" })
   newAvatar.value = file
   showCropper.value = false
-  // URL.revokeObjectURL(tempImageSrc.value) // Clean up
   tempImageSrc.value = ''
 }
 
@@ -522,7 +545,6 @@ function closeCropper() {
 
 function removeImage() {
   newAvatar.value = null
-  // Reset input if exists
   const input = document.querySelector('input[type="file"]')
   if (input) input.value = null
 }
@@ -541,14 +563,12 @@ const getInitial = (name) => {
   return name.trim()[0].toUpperCase()
 }
 const userInitial = computed(() => {
-  // 🟢 edit resident detail → ใช้ firstName ของ resident เสมอ
   if (props.editResidentDetail) {
     return form.value.firstName
       ? form.value.firstName.trim()[0].toUpperCase()
       : ''
   }
 
-  // 🔵 profile login
   const currentFirst = form.value.firstName?.trim()
   const originalFirst = originalForm.value.firstName?.trim()
 
@@ -564,22 +584,41 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
-  // Check for whitespace-only input in any field that is not empty
-  const fieldsToCheck = [
-    form.value.firstName,
-    form.value.lastName,
-    form.value.email,
-    form.value.roomNumber,
-    form.value.lineId,
-    form.value.position,
-    form.value.phoneNumber
-  ]
+  showFirstNameError.value = false
+  showLastNameError.value = false
+  showEmailError.value = false
+  showRoomNumberError.value = false
+  showDormIdError.value = false
+  showPositionError.value = false
+  showPhoneError.value = false
+  showLineIdError.value = false
+  showFirstNameWhitespaceError.value = hasWhitespace(form.value.firstName)
+  showLastNameWhitespaceError.value = hasWhitespace(form.value.lastName)
+  showEmailWhitespaceError.value = hasWhitespace(form.value.email)
+  showRoomWhitespaceError.value = hasWhitespace(form.value.roomNumber)
+  showLineIdWhitespaceError.value = hasWhitespace(form.value.lineId)
+  showPositionWhitespaceError.value = hasWhitespace(form.value.position)
+  showPhoneWhitespaceError.value = hasWhitespace(form.value.phoneNumber)
 
-  for (const field of fieldsToCheck) {
-    if (field && typeof field === 'string' && field.length > 0 && field.trim().length === 0) {
-      emit('whitespace-error', true)
-      return
-    }
+  if (
+    showFirstNameWhitespaceError.value ||
+    showLastNameWhitespaceError.value ||
+    showEmailWhitespaceError.value ||
+    showRoomWhitespaceError.value ||
+    showLineIdWhitespaceError.value ||
+    showPositionWhitespaceError.value ||
+    showPhoneWhitespaceError.value
+  ) {
+    setTimeout(() => {
+      showFirstNameWhitespaceError.value = false
+      showLastNameWhitespaceError.value = false
+      showEmailWhitespaceError.value = false
+      showRoomWhitespaceError.value = false
+      showLineIdWhitespaceError.value = false
+      showPositionWhitespaceError.value = false
+      showPhoneWhitespaceError.value = false
+    }, 10000)
+    return
   }
 
   if (form.value.email && form.value.email.length > MAX_EMAIL_LENGTH) {
@@ -647,51 +686,81 @@ const submit = async () => {
 }
 
 const addResidents = async () => {
-  // -----------------------
-  // REQUIRED FIELD CHECK
-  // -----------------------
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
 
   if (!form.value.email?.trim()) {
+    showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-required', true)
     return
   }
 
   if (!form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
   if (form.value.dormId === null || form.value.dormId === '') {
+    showDormIdError.value = true
+    setTimeout(() => {
+      showDormIdError.value = false
+    }, 10000)
     emit('dorm-id-required', true)
     return
   }
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    showLineIdError.value = true
+    setTimeout(() => {
+      showLineIdError.value = false
+    }, 10000)
     emit('line-id-error', true)
     return
   }
-  // -----------------------
-  // validate name (ไทย + อังกฤษ)
-  // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -704,44 +773,51 @@ const addResidents = async () => {
     }, 10000)
     return
   }
-
-  // -----------------------
-  // validate email
-  // -----------------------
   if (/[^a-zA-Z0-9.@]/.test(form.email)) {
+    showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-invalid-chars', true)
     return
   }
   if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
+    showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-form-error')
     return
   }
 
 
   if (form.value.phoneNumber) {
-    // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
     
-    // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
   }
-  // -----------------------
-  // CHECK DUPLICATE EMAIL
-  // -----------------------
+
   loading.value = true
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
 
-  // 🔹 เช็คจาก Firebase ไว้ก่อน
   const isFirebaseDuplicate = await loginManager.checkEmailInFirebase(form.value.email)
 
   if (dataUser) {
@@ -751,15 +827,16 @@ const addResidents = async () => {
 
     if (isDuplicate) {
       loading.value = false
+      showEmailError.value = true
+      setTimeout(() => {
+        showEmailError.value = false
+      }, 10000)
       emit('email-duplicate', true)
       return
     }
   }
 
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       userId: selectedResidentId.value,
       firstName: form.value.firstName,
@@ -775,9 +852,6 @@ const addResidents = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     const savedMember = await addMemberWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       body,
@@ -787,6 +861,10 @@ const addResidents = async () => {
     if (!savedMember) {
       loading.value = false
       if (isFirebaseDuplicate) {
+        showEmailError.value = true
+        setTimeout(() => {
+          showEmailError.value = false
+        }, 10000)
         emit('email-firebase')
       } else {
         emit('errorAddProfile')
@@ -795,20 +873,15 @@ const addResidents = async () => {
     }
     if (savedMember.status === 400) {
       loading.value = false
+      showEmailError.value = true
+      setTimeout(() => {
+        showEmailError.value = false
+      }, 10000)
       emit('email-duplicate', true)
       return
     }
-    // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
-
-
-
-    // -----------------------
-    // success
-    // -----------------------
     emit('successAddProfile')
-
-    // reset form
     Object.assign(form.value, {
       firstName: '',
       lastName: '',
@@ -835,18 +908,34 @@ const saveEditProfile = async () => {
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -866,37 +955,56 @@ const saveEditProfile = async () => {
   }
 
   if (!isStaff && !form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
 
   if (form.value.phoneNumber) {
-    // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
-    // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
   }
 
-  // -----------------------
-  // validate position (staff only)
-  // -----------------------
   if (isStaff) {
     if (!form.value.position?.trim()) {
+      showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-required', true)
       return
     }
     if (form.value.position && form.value.position.length > MAX_STAFFPOSITION_LENGTH) {
+      showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-error', true)
       return
     }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+      showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-error', true)
       return
     }
@@ -909,9 +1017,6 @@ const saveEditProfile = async () => {
     }
   }
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
@@ -929,9 +1034,6 @@ const saveEditProfile = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     loading.value = true
     const updated = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
@@ -945,11 +1047,9 @@ const saveEditProfile = async () => {
       return
     }
     loading.value = false
-    // profileManager.setCurrentProfile(profile)
-    // 🔥 sync ทุก store
+    profileManager.setCurrentProfile(profile)
     profileManager.setCurrentProfile(updated)
     loginManager.updateUser(updated)
-    // reset local state
     newAvatar.value = null
     originalForm.value = { ...form.value }
 
@@ -964,25 +1064,38 @@ const saveEditProfile = async () => {
 const saveEditDetail = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
 
-  // -----------------------
-  // validate name (ไทย + อังกฤษ)
-  // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -997,34 +1110,51 @@ const saveEditDetail = async () => {
   }
 
   if (!form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
 
   if (form.value.roomNumber && !/^[0-9]+$/.test(form.value.roomNumber)) {
+    showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    showLineIdError.value = true
+    setTimeout(() => {
+      showLineIdError.value = false
+    }, 10000)
     emit('line-id-error', true)
     return
   }
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
   }
 
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
@@ -1042,9 +1172,6 @@ const saveEditDetail = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     loading.value = true
     const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
@@ -1059,7 +1186,6 @@ const saveEditDetail = async () => {
       return
     }
 
-    // ⭐ sync userManager
     if (isStaff) {
       userManager.updateStaff({
         id: updated.id,
@@ -1123,7 +1249,6 @@ const isAddFormValid = computed(() => {
   if (!form.value.email?.trim()) return false
   if (!form.value.roomNumber?.trim()) return false
 
-  // dormId บังคับเฉพาะ STAFF ตอน add
   if (
     props.mode === 'add' &&
     loginManager.user.role === 'STAFF' &&
@@ -1136,16 +1261,9 @@ const isAddFormValid = computed(() => {
 })
 
 const isSaveDisabled = computed(() => {
-  // -------------------------
-  // ADD MODE
-  // -------------------------
   if (props.mode === 'add') {
     return !isAddFormValid.value
   }
-
-  // -------------------------
-  // EDIT MODE
-  // -------------------------
   return isFormUnchanged.value && !isAvatarChanged.value
 })
 
@@ -1166,17 +1284,37 @@ const isLineLinked = computed(() => {
   }
   return true
 })
+
+const resetErrorStates = () => {
+  showFirstNameError.value = false
+  showLastNameError.value = false
+  showEmailError.value = false
+  showRoomNumberError.value = false
+  showDormIdError.value = false
+  showPositionError.value = false
+  showPhoneError.value = false
+  showLineIdError.value = false
+  showFirstNameWhitespaceError.value = false
+  showLastNameWhitespaceError.value = false
+  showEmailWhitespaceError.value = false
+  showRoomWhitespaceError.value = false
+  showLineIdWhitespaceError.value = false
+  showPositionWhitespaceError.value = false
+  showPhoneWhitespaceError.value = false
+}
+
+defineExpose({
+  resetErrorStates
+})
 </script>
 
 <template>
   <div class="w-full mx-auto px-4">
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
-      <!-- LEFT : Profile Image Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8 flex flex-col items-center text-center"
       >
         <div class="relative inline-block group mb-6">
-          <!-- Avatar -->
           <div
             class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/avatar"
           >
@@ -1188,7 +1326,6 @@ const isLineLinked = computed(() => {
                 class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
               />
 
-              <!-- ADD MODE + ยังไม่เลือกรูป -->
               <div
                 v-else-if="props.mode === 'add'"
                 class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400"
@@ -1196,7 +1333,6 @@ const isLineLinked = computed(() => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
               </div>
 
-              <!-- EDIT MODE + ไม่มีรูป -->
               <div
                 v-else
                 class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#1D355E] to-[#0E4B90] text-white text-5xl"
@@ -1229,7 +1365,6 @@ const isLineLinked = computed(() => {
                 />
               </svg>
             </div>
-            <!-- Tooltip -->
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
             >
@@ -1242,7 +1377,6 @@ const isLineLinked = computed(() => {
           </div>
         </div>
 
-        <!-- hidden input -->
         <input
           type="file"
           accept="image/*"
@@ -1260,11 +1394,9 @@ const isLineLinked = computed(() => {
         </div>
       </div>
 
-      <!-- RIGHT : Edit Information Card -->
       <div
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8"
       >
-        <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
           <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
           <h3 class="font-extrabold text-xl text-black tracking-tight">
@@ -1272,7 +1404,6 @@ const isLineLinked = computed(() => {
           </h3>
         </div>
 
-        <!-- Form Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <div class="flex flex-col">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
@@ -1283,13 +1414,17 @@ const isLineLinked = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError || showFirstNameError
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
+            <div v-if="showFirstNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showNameLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1340,13 +1475,17 @@ const isLineLinked = computed(() => {
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError || showLastNameError
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
+            <div v-if="showLastNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showNameLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1399,13 +1538,14 @@ const isLineLinked = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showEmailLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                'w-full h-[58px] border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
               ]"
             />
+            <div v-if="showEmailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showEmailLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1442,13 +1582,14 @@ const isLineLinked = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showRoomLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                'w-full h-[58px] border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : ((showRoomNumberError || showRoomLengthError || showRoomWhitespaceError) ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
               ]"
             />
+            <div v-if="showRoomWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showRoomLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1502,6 +1643,7 @@ const isLineLinked = computed(() => {
               v-model="form.dormId"
               :options="dormOptions"
               placeholder="Select dormitory"
+              :class="[showDormIdError ? 'border-red-400 rounded-2xl' : '']"
             />
           </div>
           <div
@@ -1515,13 +1657,17 @@ const isLineLinked = computed(() => {
               :value="form.position"
               @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPositionLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                showPositionError || showPositionLengthError || showPositionMinLengthError || showPositionWhitespaceError
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
+            <div v-if="showPositionWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showPositionLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1572,13 +1718,17 @@ const isLineLinked = computed(() => {
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPhoneLengthError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : ''
+                showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
+            <div v-if="showPhoneWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showPhoneLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1601,7 +1751,48 @@ const isLineLinked = computed(() => {
             </div>
           </div>
 
-          <!-- Actions -->
+          <div v-if="showLineId" class="flex flex-col">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+              Line ID
+            </label>
+            <input
+              :value="form.lineId"
+              @input="handleLineIdInput"
+              placeholder="Enter Line ID"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              :class="[
+                showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
+              ]"
+            />
+            <div v-if="showLineIdWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
+            <div
+              v-if="showLineIdLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Line ID must be at most {{ MAX_LINE_ID_LENGTH }} characters
+              </div>
+            </div>
+          </div>
+
+       
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
               class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:bg-gray-100 rounded-2xl transition-all font-bold px-4 md:px-8 whitespace-nowrap"
@@ -1621,7 +1812,7 @@ const isLineLinked = computed(() => {
       </div>
     </div>
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
-      <!-- 🔹 CARD เดียว -->
+    
       <div
         class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-5 md:p-8"
       >
@@ -1633,14 +1824,13 @@ const isLineLinked = computed(() => {
             {{ displayFullName }}
           </h2>
         </div>
-        <!-- 🔹 WRAPPER -->
+      
         <div class="flex flex-col md:flex-row gap-10">
-          <!-- ================= LEFT : Profile Image ================= -->
           <div
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
             <div class="relative inline-block group mb-6">
-              <!-- Avatar -->
+            
               <div
                 class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/preview"
               >
@@ -1683,7 +1873,7 @@ const isLineLinked = computed(() => {
                   </svg>
                 </div>
 
-                <!-- Tooltip -->
+              
                 <div
                   class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
                 >
@@ -1696,7 +1886,7 @@ const isLineLinked = computed(() => {
               </div>
             </div>
 
-            <!-- hidden input -->
+          
             <input
               type="file"
               accept="image/*"
@@ -1716,7 +1906,7 @@ const isLineLinked = computed(() => {
           </div>
 
           <div class="md:w-2/3">
-            <!-- Header -->
+          
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
               <h3 class="font-extrabold text-xl text-black tracking-tight">
@@ -1724,7 +1914,7 @@ const isLineLinked = computed(() => {
               </h3>
             </div>
 
-            <!-- Form Grid -->
+         
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
@@ -1733,8 +1923,14 @@ const isLineLinked = computed(() => {
                 </label>
                 <input
                   v-model="form.firstName"
+                  @input="handleFirstNameInput"
                   placeholder="Enter First Name"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  :class="[
+                    showFirstNameError || showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
+                  ]"
                 />
               </div>
 
@@ -1745,8 +1941,14 @@ const isLineLinked = computed(() => {
                 </label>
                 <input
                   v-model="form.lastName"
+                  @input="handleLastNameInput"
                   placeholder="Enter Last Name"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  :class="[
+                    showLastNameError || showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
+                  ]"
                 />
               </div>
 
@@ -1758,10 +1960,11 @@ const isLineLinked = computed(() => {
                 <input
                   :disabled="mode === 'edit'"
                   v-model="form.email"
+                  @input="handleEmailInput"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
                   ]"
                 />
               </div>
@@ -1772,11 +1975,12 @@ const isLineLinked = computed(() => {
                 </label>
                 <input
                   v-model="form.roomNumber"
+                  @input="handleRoomInput"
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showRoomNumberError || showRoomLengthError || showRoomWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
                   ]"
                 />
               </div>
@@ -1790,6 +1994,7 @@ const isLineLinked = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Select Dormitory"
                   class="max-w-md"
+                  :class="[showDormIdError ? 'border-red-400 rounded-2xl' : '']"
                 />
               </div>
               <div class="flex flex-col">
@@ -1798,12 +2003,33 @@ const isLineLinked = computed(() => {
                 </label>
                 <input
                   v-model="form.phoneNumber"
+                  @input="handlePhoneInput"
                   placeholder="Enter Phone Number"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  :class="[
+                    showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
+                  ]"
+                />
+              </div>
+              <div v-if="showLineId" class="flex flex-col">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+                  Line ID
+                </label>
+                <input
+                  v-model="form.lineId"
+                  @input="handleLineIdInput"
+                  placeholder="Enter Line ID"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  :class="[
+                    showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
+                  ]"
                 />
               </div>
 
-              <!-- Actions -->
               <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
                   class="flex-1 md:flex-none text-[#898989] text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"

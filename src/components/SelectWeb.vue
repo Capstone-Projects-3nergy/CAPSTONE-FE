@@ -69,14 +69,14 @@ onUnmounted(() => {
         !customClass ? 'bg-gray-50/50 border border-gray-200 rounded-2xl px-4 h-[58px] hover:border-gray-300' : customClass,
         $slots.icon && !customClass.includes('pl-') ? 'pl-10' : '',
         isOpen ? 'bg-white border-[#0E4B90] ring-4 ring-blue-100 shadow-sm' : '',
-        error ? 'border-red-400 ring-4 ring-red-50' : '',
+        error ? 'border-red-400 ring-4 ring-red-50 text-red-600' : '',
         disabled ? 'bg-gray-100/80 border-gray-200 cursor-not-allowed opacity-75' : ''
       ]"
     >
       <div v-if="$slots.icon" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center">
         <slot name="icon" />
       </div>
-      <span :class="[{ 'text-gray-400': !selectedOption || disabled }, 'truncate']" class="flex-1 text-left">
+      <span :class="[{ 'text-gray-400': (!selectedOption || disabled) && !error, 'text-red-600': error && !selectedOption }, 'truncate']" class="flex-1 text-left">
         {{ selectedOption ? selectedOption.label : placeholder }}
       </span>
       <div class="flex-shrink-0 ml-2">
@@ -96,8 +96,10 @@ onUnmounted(() => {
         </svg>
         <svg
           v-else
-          class="w-5 h-5 text-gray-400 transition-transform duration-300"
-          :class="{ 'rotate-180 text-[#0E4B90]': isOpen }"
+          class="w-5 h-5 transition-transform duration-300"
+          :class="[
+            isOpen ? 'rotate-180 text-[#0E4B90]' : (error ? 'text-red-600' : 'text-gray-400')
+          ]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -107,7 +109,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Dropdown Menu -->
     <transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="transform scale-95 opacity-0 -translate-y-2"

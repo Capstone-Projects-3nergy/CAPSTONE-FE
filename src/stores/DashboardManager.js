@@ -1,10 +1,10 @@
 import { reactive, computed, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { fetchDashboardData } from '@/utils/fetchUtils'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
-  // Current state for navigation - Split for independent charts
   const parcelRefDate = ref(new Date())
-  const parcelView = ref('daily') // 'daily' | 'weekly' | 'monthly'
+  const parcelView = ref('daily') 
   
   const residentRefDate = ref(new Date())
   const residentView = ref('daily')
@@ -17,6 +17,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     totalParcels: 0,
     pickedUpParcels: 0,
     awaitingParcels: 0,
+    waitingForStaffParcels: 0,
     overdueParcels: 0,
     totalResidents: 0,
     activeResidents: 0,
@@ -29,18 +30,25 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     totalParcels: 0,
     pickedUpParcels: 0,
     awaitingParcels: 0,
+    waitingForStaffParcels: 0,
     overdueParcels: 0
   })
 
-  // Chart data structure for Parcel Activity
   const chartData = reactive({
     labels: [],
     datasets: [
       { 
-        label: 'Received', 
+        label: 'Waiting', 
         data: [], 
         backgroundColor: 'rgba(59, 130, 246, 0.85)',
         borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 1 
+      },
+      { 
+        label: 'Waiting for Staff', 
+        data: [], 
+        backgroundColor: 'rgba(234, 179, 8, 0.85)', 
+        borderColor: 'rgba(234, 179, 8, 1)',
         borderWidth: 1 
       },
       { 
@@ -49,20 +57,24 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         backgroundColor: 'rgba(16, 185, 129, 0.85)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 1 
+      },
+      { 
+        label: 'Overdue', 
+        data: [], 
+        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+        borderColor: 'rgba(239, 68, 68, 1)',
+        borderWidth: 1 
       }
-      // Overdue removed as per previous request
     ]
   })
 
-  // Resident Data Chart structure
   const residentChartData = reactive({
     labels: [],
     data: [],
+    statusBreakdown: [], 
     total: 0,
     peak: '-'
   })
-
-  // Helper: Get start/end dates for the current view and reference date
   const getPeriodBounds = (type = 'parcel') => {
     const refDate = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
     const view = type === 'parcel' ? parcelView.value : residentView.value
@@ -74,7 +86,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       start.setHours(0, 0, 0, 0)
       end.setHours(23, 59, 59, 999)
     } else if (view === 'weekly') {
-      const day = start.getDay() || 7 // 1-7
+      const day = start.getDay() || 7 
       start.setDate(start.getDate() - (day - 1))
       start.setHours(0, 0, 0, 0)
       
@@ -110,22 +122,26 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const getMappedParcels = computed(() => {
     return parcels.map(p => ({
       id: p.parcelId || p.id,
-      trackingNumber: p.trackingNumber || 'N/A',
-      residentName: p.ownerName || p.residentName || 'N/A',
-      roomNumber: p.roomNumber || 'N/A',
+      trackingNumber: p.trackingNumber || 'Awaiting Staff',
+      residentName: p.ownerName || p.residentName || 'Awaiting Staff',
+      roomNumber: p.roomNumber || 'Awaiting Staff',
       status: mapStatus(p.status),
       receiveAt: p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt || new Date().toISOString(),
-      updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString()
+      updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString(),
+      statusHistory: p.statusHistory || []
     }))
   })
 
   const mapStatus = (status) => {
-    const s = status?.toUpperCase() || ''
+    const s = status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+    
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
-    if (s.includes('WAITING') || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s.includes('STAFF') || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT') return 'Waiting'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
-    return 'Received'
+    
+    return 'Waiting'
   }
 
   const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null) => {
@@ -135,129 +151,291 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
     const today = new Date()
     
-    // 1. Calculate OVERALL Stats (Global, not period-dependent)
     const allParcels = parcels || []
     overallStats.totalParcels = allParcels.length
     overallStats.pickedUpParcels = allParcels.filter(p => {
        const s = p.status?.toUpperCase() || ''
        return s === 'PICKED_UP' || s === 'TAKEN'
     }).length
+    overallStats.waitingForStaffParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+       return s.includes('STAFF') || s.includes('PENDING')
+    }).length
     overallStats.awaitingParcels = allParcels.filter(p => {
-       const s = p.status?.toUpperCase() || ''
-       return s !== 'PICKED_UP' && s !== 'TAKEN' && !s.includes('OVERDUE')
+       const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+       const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s.includes('NOTIFIED')
+       const isStaff = s.includes('STAFF') || s.includes('PENDING')
+       return isWaiting && !isStaff && !s.includes('OVERDUE')
     }).length
     const oneDayMs = 24 * 60 * 60 * 1000
     overallStats.overdueParcels = allParcels.filter(p => {
-      const pStatus = p.status?.toUpperCase() || ''
-      if (pStatus === 'PICKED_UP' || pStatus === 'TAKEN') return false
+      const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+      if (s.includes('PICKED') || s.includes('TAKEN')) return false
+      if (s.includes('STAFF') || s.includes('PENDING')) return false
       
       const rDate = new Date(p.receivedAt || p.createdAt || p.date)
       return (today - rDate) > oneDayMs
     }).length
 
-    // Separate bounds for parcel and resident
     const parcelBounds = getPeriodBounds('parcel')
     const residentBounds = getPeriodBounds('resident')
     
-    // 2. Filter parcels for the current period for charts
-    const parcelsInPeriod = parcels.filter(p => {
-      const dStr = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
-      const d = new Date(dStr)
-      return d >= parcelBounds.start && d <= parcelBounds.end
+    const parcelsWithActivity = parcels.filter(p => {
+      const start = parcelBounds.start;
+      const end = parcelBounds.end;
+      
+      const dArrival = new Date(p.receivedAt || p.createdAt || p.date)
+      const isArrivalInRange = !isNaN(dArrival.getTime()) && dArrival >= start && dArrival <= end
+      if (isArrivalInRange) return true
+      
+      const dUpdate = new Date(p.updatedAt || p.updateAt)
+      const isUpdateInRange = !isNaN(dUpdate.getTime()) && dUpdate >= start && dUpdate <= end
+      if (isUpdateInRange) return true
+      
+      if (p.statusHistory && Array.isArray(p.statusHistory)) {
+        return p.statusHistory.some(h => {
+          const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
+          return !isNaN(d.getTime()) && d >= start && d <= end
+        })
+      }
+      return false
     })
 
-    const periodReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
-    const periodPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
-    
-    // Update period-specific stats (based on parcel view)
-    stats.totalParcels = parcelsInPeriod.length
-    stats.pickedUpParcels = periodPickedUp.length
-    stats.awaitingParcels = periodReceived.length
-    stats.overdueParcels = parcelsInPeriod.filter(p => {
-      const pStatus = p.status?.toUpperCase() || ''
-      const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE')
-      const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
-      if (isPickedUp) return false
+    const getEventsInRange = (parcel, category) => {
+      const history = parcel.statusHistory || []
+      const start = parcelBounds.start
+      const end = parcelBounds.end
       
-      const rDate = new Date(p.receivedAt || p.createdAt || p.date)
-      const diffHours = (today - rDate) / (1000 * 60 * 60)
-      return pStatus.includes('OVERDUE') || (diffHours >= 24 && isArrived)
-    }).length
+      const hasHistoryEvent = history.some(h => {
+        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '')
+        const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
+        const inRange = !isNaN(d.getTime()) && d >= start && d <= end
+        
+        if (category === 'pickedUp') return inRange && (s === 'PICKEDUP' || s === 'TAKEN')
+        if (category === 'staff') return inRange && (s.includes('STAFF') || s.includes('PENDING'))
+        if (category === 'overdue') {
+          if (inRange && s.includes('OVERDUE')) return true
+          const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+          if (!isNaN(arrivalDate.getTime())) {
+            const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+            return overdueDate >= start && overdueDate <= end && !(s.includes('PICKED') || s.includes('TAKEN')) && !(s.includes('STAFF') || s.includes('PENDING'))
+          }
+          return false
+        }
+        if (category === 'waiting') return inRange && (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'NOTIFIED') && !s.includes('STAFF')
+        return false
+      })
+      
+      if (hasHistoryEvent) return true
+      
+      const currentStatus = (parcel.status || '').toUpperCase().replace(/[\s_-]/g, '')
+      const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+      const isArrivalInRange = !isNaN(arrivalDate.getTime()) && arrivalDate >= start && arrivalDate <= end
+      const updateDate = new Date(parcel.updatedAt || parcel.updateAt)
+      const isUpdateInRange = !isNaN(updateDate.getTime()) && updateDate >= start && updateDate <= end
 
-    // 3. Generate Chart Data with separate bounds
-    generateParcelChart(parcelsInPeriod, parcelBounds.start, parcelBounds.end)
-    generateResidentChart(members, residentBounds.start, residentBounds.end)
+      if (category === 'pickedUp') return (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange
+      if (category === 'staff') return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
+      if (category === 'overdue') {
+        if (currentStatus.includes('OVERDUE') && isUpdateInRange) return true
+        const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+        if (!isNaN(arrivalDate.getTime())) {
+          const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+          return overdueDate >= start && overdueDate <= end && !(currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')) && !(currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))
+        }
+        return false
+      }
+      if (category === 'waiting') return (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus === 'NOTIFIED') && !currentStatus.includes('STAFF') && isArrivalInRange && !currentStatus.includes('OVERDUE')
+      
+      return false
+    }
     
-    stats.totalResidents = members.length
-    stats.activeResidents = members.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
-    stats.pendingResidents = members.filter(r => r.status?.toUpperCase() === 'PENDING').length
-    stats.inactiveResidents = members.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
+    stats.totalParcels = parcelsWithActivity.length
+    stats.pickedUpParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'pickedUp')).length
+    stats.waitingForStaffParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'staff')).length
+    stats.awaitingParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'waiting')).length
+    stats.overdueParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'overdue')).length
+
+    const allResidents = members.filter(m => (m.role || '').toUpperCase() === 'RESIDENT')
+    
+    generateParcelChart(parcelsWithActivity, parcelBounds.start, parcelBounds.end)
+    generateResidentChart(allResidents, residentBounds.start, residentBounds.end)
+    
+    const uniqueResidentsMap = new Map()
+    allResidents.forEach(r => {
+      const email = r.email || `${r.firstName}_${r.lastName}`
+      if (!uniqueResidentsMap.has(email)) {
+        uniqueResidentsMap.set(email, r)
+      } else {
+        const existing = uniqueResidentsMap.get(email)
+        const existingDate = new Date(existing.updateAt || existing.createdAt || 0)
+        const currentDate = new Date(r.updateAt || r.createdAt || 0)
+        if (currentDate > existingDate) {
+          uniqueResidentsMap.set(email, r)
+        }
+      }
+    })
+    
+    const uniqueResidents = Array.from(uniqueResidentsMap.values())
+    
+    stats.totalResidents = uniqueResidents.length
+    stats.activeResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
+    stats.pendingResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'PENDING').length
+    stats.inactiveResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
     stats.totalAnnouncements = announcements.length
   }
 
   const generateParcelChart = (data, start, end) => {
     chartData.labels = []
-    chartData.datasets[0].data = []
-    chartData.datasets[1].data = []
-
-    if (parcelView.value === 'daily') {
-      // 24 Hours
-      for (let i = 0; i < 24; i++) {
-        chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          if (d.getHours() === i) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      }
-    } else if (parcelView.value === 'weekly') {
-      // 7 Days (Mon-Sun)
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      chartData.labels = days
-      days.forEach((day, idx) => {
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          const dIdx = (d.getDay() + 6) % 7 // Mon=0
-          if (dIdx === idx) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      })
-    } else if (parcelView.value === 'monthly') {
-      // 28-31 Days
-      const daysInMonth = end.getDate()
-      for (let i = 1; i <= daysInMonth; i++) {
-        chartData.labels.push(i.toString())
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          if (d.getDate() === i) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      }
+    const view = parcelView.value
+    
+    let slotCount = 0
+    if (view === 'daily') {
+      slotCount = 24
+      for (let i = 0; i < 24; i++) chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
+    } else if (view === 'weekly') {
+      slotCount = 7
+      chartData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    } else if (view === 'monthly') {
+      slotCount = end.getDate()
+      for (let i = 1; i <= slotCount; i++) chartData.labels.push(i.toString())
     }
+
+    const waitingData = new Array(slotCount).fill(0)
+    const staffWaitingData = new Array(slotCount).fill(0)
+    const pickedUpData = new Array(slotCount).fill(0)
+    const overdueData = new Array(slotCount).fill(0)
+
+    data.forEach(p => {
+      const sRaw = (p.status || '').toUpperCase().replace(/[\s_-]/g, '')
+      const isWaitingForStaffStatus = sRaw.includes('STAFF') || sRaw.includes('PENDING')
+      const isWaitingResidentStatus = (sRaw === 'WAITING' || sRaw === 'RECEIVED' || sRaw === 'WAIT' || sRaw.includes('NOTIFIED')) && !isWaitingForStaffStatus
+
+      let arrivals = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        arrivals = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+             return (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s.includes('NOTIFIED')) && !s.includes('STAFF')
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+      
+      if (isWaitingResidentStatus && arrivals.length === 0) {
+        arrivals.push(new Date(p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt))
+      }
+
+      arrivals.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) waitingData[idx]++
+        }
+      })
+
+      let staffArrivals = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        staffArrivals = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+             return s.includes('STAFF') || s.includes('PENDING')
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+      
+      if (isWaitingForStaffStatus && staffArrivals.length === 0) {
+        staffArrivals.push(new Date(p.receivedAt || p.createdAt || p.date))
+      }
+
+      staffArrivals.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) staffWaitingData[idx]++
+        }
+      })
+
+      const currentStatus = (p.status || '').toUpperCase()
+      const isPickedUpNow = currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')
+      
+      let completions = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        completions = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase() || ''
+             return s === 'PICKED_UP' || s === 'TAKEN'
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+
+      if (isPickedUpNow && completions.length === 0) {
+        completions.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt || p.date))
+      }
+
+      completions.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) pickedUpData[idx]++
+        }
+      })
+
+      const isOverdueNow = currentStatus.includes('OVERDUE')
+      let overdues = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        overdues = p.statusHistory
+          .filter(h => h.status?.toUpperCase().includes('OVERDUE'))
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+
+      const arrivalDate = new Date(p.receivedAt || p.createdAt || p.date)
+      if (!isNaN(arrivalDate.getTime()) && overdues.length === 0) {
+        const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+        const isNotPickedUp = !currentStatus.includes('PICKED') && !currentStatus.includes('TAKEN')
+        const isNotStaff = !currentStatus.includes('STAFF') && !currentStatus.includes('PENDING')
+        
+        if (isNotPickedUp && isNotStaff) {
+          const now = new Date()
+          if ((now - arrivalDate) > (24 * 60 * 60 * 1000)) {
+            overdues.push(overdueDate)
+          }
+        }
+      }
+
+      if (isOverdueNow && overdues.length === 0) {
+        overdues.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt || p.date))
+      }
+
+      overdues.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) overdueData[idx]++
+        }
+      })
+    })
+
+    chartData.datasets[0].data = waitingData
+    chartData.datasets[1].data = staffWaitingData
+    chartData.datasets[2].data = pickedUpData
+    chartData.datasets[3].data = overdueData
   }
 
   const generateResidentChart = (data, start, end) => {
     const view = residentView.value
     
-    // Create appropriate labels based on resident view
     let labels = []
     if (view === 'daily') {
       for (let i = 0; i < 24; i++) labels.push(`${i.toString().padStart(2, '0')}:00`)
@@ -270,19 +448,31 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
     residentChartData.labels = labels
     residentChartData.data = new Array(labels.length).fill(0)
+    residentChartData.statusBreakdown = new Array(labels.length).fill(null).map(() => ({ active: 0, pending: 0, inactive: 0 }))
     
-    // Residents growth in period
     data.forEach(r => {
       const d = new Date(r.updateAt || r.createdAt)
       if (d >= start && d <= end) {
+        let idx = -1
         if (view === 'daily') {
-          residentChartData.data[d.getHours()]++
+          idx = d.getHours()
         } else if (view === 'weekly') {
-          const dIdx = (d.getDay() + 6) % 7
-          if (dIdx >= 0 && dIdx < 7) residentChartData.data[dIdx]++
+          idx = (d.getDay() + 6) % 7
         } else if (view === 'monthly') {
-          const dIdx = d.getDate() - 1
-          if (dIdx >= 0 && dIdx < residentChartData.data.length) residentChartData.data[dIdx]++
+          idx = d.getDate() - 1
+        }
+
+        if (idx >= 0 && idx < residentChartData.data.length) {
+          residentChartData.data[idx]++
+          
+          const status = (r.status || '').toUpperCase()
+          if (status === 'ACTIVE' || status === 'VERIFIED') {
+            residentChartData.statusBreakdown[idx].active++
+          } else if (status === 'PENDING') {
+            residentChartData.statusBreakdown[idx].pending++
+          } else if (status === 'INACTIVE') {
+            residentChartData.statusBreakdown[idx].inactive++
+          }
         }
       }
     })
@@ -353,6 +543,26 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return false
   }
 
+  const loadDetailedDashboard = async (router) => {
+    try {
+      const url = `${import.meta.env.VITE_BASE_URL}/api/dashboard/detailed`
+      const data = await fetchDashboardData(url, router)
+      
+      if (data && data.parcels) {
+        calculateDashboardData(
+          data.parcels,
+          data.members || data.residents,
+          data.announcements
+        )
+        return true
+      }
+      return false
+    } catch (err) {
+      console.warn('loadDetailedDashboard failed, using fallback', err)
+      return false
+    }
+  }
+
   return {
     parcels,
     members,
@@ -373,6 +583,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     setMembers,
     setAnnouncements,
     calculateDashboardData,
+    loadDetailedDashboard,
     getMappedParcels,
     nextPeriod,
     previousPeriod,

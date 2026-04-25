@@ -169,7 +169,6 @@ const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
   const current = currentStatus.value ? String(currentStatus.value).trim().toUpperCase() : ''
-  // If pending, allow changing to ACTIVE or keep PENDING
   if (current === 'PENDING') {
     return [
       { value: 'PENDING', label: 'Pending' },
@@ -177,7 +176,6 @@ const statusOptions = computed(() => {
       { value: 'INACTIVE', label: 'Inactive' }
     ]
   }
-  // Otherwise, allow ACTIVE / INACTIVE
   return [
     { value: 'ACTIVE', label: 'Active' },
     { value: 'INACTIVE', label: 'Inactive' }
@@ -186,9 +184,7 @@ const statusOptions = computed(() => {
 
 const isLocked = computed(() => {
   const status = currentStatus.value ? String(currentStatus.value).trim().toUpperCase() : ''
-  // Default to locked (true) if status is not yet loaded, to prevent UI flicker
   if (!status) return true 
-  // Only PENDING is editable (isLocked = false), everything else is locked
   return status !== 'PENDING'
 })
 
@@ -203,13 +199,10 @@ const getUserDetail = async (id) => {
     
     if (!data) return
     
-    // Smart merge: Only update if the API returns a value for that field
-    // and provide fallbacks for common name field patterns
     const updatedForm = { ...form.value }
     
     if (data.userId) updatedForm.id = data.userId
     
-    // Handle name mapping (fullName vs firstName/lastName)
     if (data.fullName) {
       updatedForm.fullName = data.fullName
     } else if (data.firstName || data.lastName) {
@@ -222,7 +215,6 @@ const getUserDetail = async (id) => {
     if (data.status) updatedForm.status = data.status
     if (data.profileImageUrl) updatedForm.photo = data.profileImageUrl
 
-    // Update form and reactive status values
     form.value = updatedForm
     
     if (updatedForm.status) {
@@ -241,13 +233,11 @@ watch(
   async (userId) => {
     if (!userId) return
     
-    // Pre-populate from props so UI is ready immediately and isLocked is correct
     if (props.residentDataStatus) {
       const p = props.residentDataStatus
       if (p.status) {
         const caps = p.status.toUpperCase()
         currentStatus.value = caps
-        // Default to ACTIVE if current is PENDING for faster approval
         newStatus.value = (caps === 'PENDING') ? 'ACTIVE' : caps
       }
       form.value = {
@@ -274,7 +264,6 @@ const saveStatusChange = async () => {
       ...form.value,
       status: newStatus.value,
     }
-    // Remove unnecessary fields if API expects specific DTO
     delete body.photo
     delete body.id
 
@@ -286,7 +275,6 @@ const saveStatusChange = async () => {
     )
 
     if (updatedUser) {
-        // Refresh local store
         userStore.updateMember({
             ...form.value,
             status: newStatus.value
@@ -339,7 +327,6 @@ const currentStepIndex = computed(() => {
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
         @click.stop
       >
-        <!-- Modal Content -->
         <div v-if="statusChangedSuccessfuly" class="p-8 sm:p-10 flex flex-col items-center text-center">
           <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6 animate-bounce-short">
              <svg class="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -359,7 +346,6 @@ const currentStepIndex = computed(() => {
         </div>
 
         <div v-else class="p-0">
-          <!-- Header Area -->
           <div class="bg-slate-50 p-6 sm:p-8 border-b border-slate-100">
             <div class="flex items-center justify-between mb-6">
               <div>
@@ -370,7 +356,6 @@ const currentStepIndex = computed(() => {
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
 
-            <!-- Profile Summary Card -->
             <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
               <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0 overflow-hidden">
                 <img v-if="form.photo" :src="form.photo" class="w-full h-full object-cover" />
@@ -385,8 +370,6 @@ const currentStepIndex = computed(() => {
           </div>
 
           <div class="p-6 sm:p-8">
-
-            <!-- Email Notification Reminder (For Pending) -->
             <div v-if="!isLocked" class="mb-8 bg-blue-50/50 rounded-3xl p-5 border border-blue-100 flex flex-col sm:flex-row items-center gap-5">
               <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

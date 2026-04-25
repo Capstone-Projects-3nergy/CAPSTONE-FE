@@ -52,12 +52,32 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  let options = ['RECEIVED', 'PICKED_UP']
+  const s = currentStatus.value?.toUpperCase() || ''
   
-  return options.map(s => ({
-    value: s,
-    label: s.replace(/_/g, ' ')
-  }))
+  if (s === 'WAITING_FOR_STAFF') {
+    return [
+      { value: 'WAITING_FOR_STAFF', label: 'Waiting for Staff' },
+      { value: 'RECEIVED', label: 'Received' }
+    ]
+  }
+  
+  if (s === 'WAITING') {
+    return [
+      { value: 'WAITING', label: 'Waiting' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
+  if (s === 'RECEIVED') {
+    return [
+      { value: 'RECEIVED', label: 'Received' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
+  return [
+    { value: s, label: s.replace(/_/g, ' ') }
+  ]
 })
 
 const isPickUp = computed(() => currentStatus.value === 'PICKED_UP')
@@ -131,8 +151,22 @@ const cancel = () => {
   router.replace({ name: 'staffparcels' })
 }
 
-const steps = ['RECEIVED', 'PICKED_UP']
-const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
+const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
+const getStepLabel = (step) => {
+  if (step === 'WAITING_FOR_STAFF') return 'WAITING FOR STAFF' 
+  if (step === 'WAITING') {
+    return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
+  }
+  if (step === 'PICKED_UP') return 'PICKED UP'
+  return step.replace(/_/g, ' ')
+}
+
+const currentStepIndex = computed(() => {
+  const s = currentStatus.value?.toUpperCase() || ''
+  if (s === 'RECEIVED' || s === 'WAITING') return 1
+  if (s === 'PICKED_UP') return 2
+  return 0
+})
 </script>
 
 <template>
@@ -145,7 +179,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
         @click.stop
       >
-        <!-- Modal Content -->
+    
         <div v-if="statusChangedSuccessfuly" class="p-8 sm:p-10 flex flex-col items-center text-center">
           <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6 animate-bounce-short">
              <svg class="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -165,7 +199,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
         </div>
 
         <div v-else class="p-0">
-          <!-- Header Area -->
+     
           <div class="bg-slate-50 p-6 sm:p-8 border-b border-slate-100">
             <div class="flex items-center justify-between mb-6">
               <div>
@@ -176,7 +210,6 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
 
-            <!-- Parcel Summary Card -->
             <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
               <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
@@ -202,18 +235,18 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
                   <div 
                     class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
                     :class="[
-                      currentStatus === step ? 'bg-white border-blue-500 scale-125' : 
+                      (currentStepIndex === i) ? 'bg-white border-blue-500 scale-125' : 
                       (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
                     ]"
                   >
                     <svg v-if="i < currentStepIndex" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
                       <path d="M5 13l4 4L19 7" />
                     </svg>
-                    <div v-if="currentStatus === step" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div v-if="currentStepIndex === i" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
-                  <span class="text-[9px] font-extrabold tracking-tight" 
-                        :class="currentStatus === step ? 'text-blue-600' : 'text-slate-400'">
-                    {{ step.split('_')[0] }}
+                  <span class="text-[8px] font-extrabold tracking-tighter uppercase text-center leading-none" 
+                        :class="currentStepIndex === i ? 'text-blue-600' : 'text-slate-400'">
+                    {{ getStepLabel(step) }}
                   </span>
                 </div>
               </div>

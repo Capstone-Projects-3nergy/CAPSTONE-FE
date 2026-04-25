@@ -239,7 +239,6 @@ const formatDate = (dateString) => {
   opacity: 0;
 }
 
-/* Animations using standard CSS as fallback for Tailwind animate */
 .animate-in {
   animation-duration: 300ms;
   animation-fill-mode: both;

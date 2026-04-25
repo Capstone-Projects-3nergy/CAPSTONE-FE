@@ -28,6 +28,8 @@ const notRegisterError = ref(false)
 const emailRequire = ref(false)
 const passwordRequire = ref(false)
 const emailPasswordRequire = ref(false)
+const emailWhitespaceError = ref(false)
+const passwordWhitespaceError = ref(false)
 const loading = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
@@ -42,6 +44,8 @@ const closePopUp = (operate) => {
   if (operate === 'passwordEmpty') passwordRequire.value = false
   if (operate === 'emailPasswordEmpty') emailPasswordRequire.value = false
   if (operate === 'emailFirebase') isEmailFirebase.value = false
+  emailWhitespaceError.value = false
+  passwordWhitespaceError.value = false
 }
 
 onMounted(async () => {
@@ -51,9 +55,25 @@ onMounted(async () => {
 })
 const loginHomePageWeb = async () => {
   loading.value = true
-  if (!email.value.trim() && !password.value.trim()) {
+  const hasWhitespace = (s) => s && (s !== s.trim())
+
+  if (!email.value && !password.value) {
     emailPasswordRequire.value = true
     setTimeout(() => (emailPasswordRequire.value = false), 10000)
+    loading.value = false
+    return
+  }
+
+  const emailWS = hasWhitespace(email.value)
+  const passwordWS = hasWhitespace(password.value)
+
+  if (emailWS || passwordWS) {
+    if (emailWS) emailWhitespaceError.value = true
+    if (passwordWS) passwordWhitespaceError.value = true
+    setTimeout(() => {
+      emailWhitespaceError.value = false
+      passwordWhitespaceError.value = false
+    }, 10000)
     loading.value = false
     return
   }
@@ -61,7 +81,6 @@ const loginHomePageWeb = async () => {
   if (!email.value.trim()) {
     emailRequire.value = true
     setTimeout(() => (emailRequire.value = false), 10000)
-
     loading.value = false
     return
   }
@@ -69,7 +88,6 @@ const loginHomePageWeb = async () => {
   if (!password.value.trim()) {
     passwordRequire.value = true
     setTimeout(() => (passwordRequire.value = false), 10000)
-
     loading.value = false
     return
   }
@@ -126,13 +144,12 @@ const loginHomePageWeb = async () => {
 
       }
 
-      // Notification Logic
+    
       const currentUser = authManager.user
       if (
         currentUser.role === 'STAFF' ||
         currentUser.role === 'RESIDENT'
       ) {
-        // Always show In-App Login Notification
         notificationManager.notifyLogin(
           currentUser.fullName || currentUser.email,
           currentUser.role
@@ -140,7 +157,7 @@ const loginHomePageWeb = async () => {
 
         const key = `welcome_shown_${currentUser.email}`
         if (!localStorage.getItem(key)) {
-          // LINE Notification (First time only)
+         
           try {
             await LineNotificationManager.sendToGroup(
               'GROUP_ID', 
@@ -154,15 +171,12 @@ const loginHomePageWeb = async () => {
           localStorage.setItem(key, 'true')
         }
 
-        // Fetch notifications from backend
         try {
             await notificationManager.fetchNotifications(router)
         } catch (e) {
              console.error('Failed to fetch notifications', e)
         }
       }
-
-      // Manual Redirect
       if (currentUser) {
         switch (currentUser.role) {
           case 'RESIDENT':
@@ -277,7 +291,6 @@ const showResetPasswordPageWeb = async function () {
     <div
       class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 min-h-screen relative overflow-hidden"
     >
-      <!-- Subtle Decorative Blobs -->
       <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -383,6 +396,22 @@ const showResetPasswordPageWeb = async function () {
 
         <div class="fixed top-40 px-6 mt-2 z-[9999]">
           <AlertPopUp
+            v-if="emailWhitespaceError"
+            :titles="'Email has leading or trailing spaces'"
+            message="Error!!"
+            styleType="red"
+            operate="emailWhitespace"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="passwordWhitespaceError"
+            :titles="'Password has leading or trailing spaces'"
+            message="Error!!"
+            styleType="red"
+            operate="passwordWhitespace"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="incorrect"
             :titles="'Email or Password is incorrect.'"
             message="Error!!"
@@ -406,7 +435,16 @@ const showResetPasswordPageWeb = async function () {
             operate="notRegister"
             @closePopUp="closePopUp"
           />
+
           <AlertPopUp
+            v-if="isEmailFirebase"
+            titles="Unable to complete login. Please contact our support team for assistance."
+            message="Error!!"
+            styleType="red"
+            operate="emailFirebase"
+            @closePopUp="closePopUp"
+          />
+           <AlertPopUp
             v-if="emailRequire"
             :titles="'Please enter your email'"
             message="Error!!"
@@ -430,14 +468,6 @@ const showResetPasswordPageWeb = async function () {
             operate="emailPasswordEmpty"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
-            v-if="isEmailFirebase"
-            titles="Unable to complete login. Please contact our support team for assistance."
-            message="Error!!"
-            styleType="red"
-            operate="emailFirebase"
-            @closePopUp="closePopUp"
-          />
         </div>
 
         <form @submit.prevent="loginHomePageWeb" class="space-y-6">
@@ -449,11 +479,12 @@ const showResetPasswordPageWeb = async function () {
                 viewBox="0 0 22 22"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300"
+                :class="isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect ? 'text-red-600' : 'text-[#8C8F91]'"
               >
                 <path
                   d="M18.3333 3.66667H3.66659C2.65825 3.66667 1.84242 4.49167 1.84242 5.50001L1.83325 16.5C1.83325 17.5083 2.65825 18.3333 3.66659 18.3333H18.3333C19.3416 18.3333 20.1666 17.5083 20.1666 16.5V5.50001C20.1666 4.49167 19.3416 3.66667 18.3333 3.66667ZM18.3333 7.33334L10.9999 11.9167L3.66659 7.33334V5.50001L10.9999 10.0833L18.3333 5.50001V7.33334Z"
-                  fill="#8C8F91"
+                  fill="currentColor"
                 />
               </svg>
 
@@ -461,10 +492,20 @@ const showResetPasswordPageWeb = async function () {
                 v-model="email"
                 type="email"
                 placeholder="Email"
-                class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
-                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit }"
+                :class="[
+                  isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect || isEmailFirebase
+                    ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 text-red-600'
+                    : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
+                ]"
               />
+            </div>
+            <div v-if="emailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-xs font-medium" v-if="emailWhitespaceError">Please remove leading or trailing spaces.</span>
             </div>
           </div>
           <div
@@ -489,18 +530,20 @@ const showResetPasswordPageWeb = async function () {
               Limit email name to 50 characters or less.
             </div>
           </div>
-          <div class="relative">
+          <div class="mb-3">
+            <div class="relative">
             <svg
               width="24"
               height="24"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300"
+              :class="isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire || incorrect || isEmailFirebase ? 'text-red-600' : 'text-[#8C8F91]'"
             >
               <path
                 d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
-                fill="#8C8F91"
+                fill="currentColor"
               />
             </svg>
 
@@ -508,8 +551,13 @@ const showResetPasswordPageWeb = async function () {
               :type="isPasswordVisible ? 'text' : 'password'"
               v-model="password"
               placeholder="Password"
-              class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+              class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
+              :class="[
+                isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire || incorrect  || isEmailFirebase
+                  ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 text-red-600'
+                  : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
+              ]"
             />
             <button
               type="button"
@@ -520,7 +568,8 @@ const showResetPasswordPageWeb = async function () {
                 v-if="isPasswordVisible"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 576 512"
-                class="h-5 w-5 text-[#8C8F91] cursor-pointer"
+                class="h-5 w-5 cursor-pointer transition-colors duration-300"
+                :class="isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire || incorrect || isEmailFirebase ? 'text-red-600' : 'text-[#8C8F91]'"
               >
                 <path
                   fill="currentColor"
@@ -531,7 +580,8 @@ const showResetPasswordPageWeb = async function () {
                 v-else
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 640 512"
-                class="h-5 w-5 text-[#8C8F91] cursor-pointer"
+                class="h-5 w-5 cursor-pointer transition-colors duration-300"
+                :class="isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire || incorrect  || isEmailFirebase ? 'text-red-600' : 'text-[#8C8F91]'"
               >
                 <path
                   fill="currentColor"
@@ -540,8 +590,15 @@ const showResetPasswordPageWeb = async function () {
               </svg>
             </button>
           </div>
+          <div v-if="passwordWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-xs font-medium" v-if="passwordWhitespaceError">Please remove leading or trailing spaces.</span>
+          </div>
+        </div>
 
-          <div class="flex justify-end -mt-4 mb-3">
+          <div class="flex justify-end mt-2 mb-3">
             <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
@@ -579,4 +636,17 @@ const showResetPasswordPageWeb = async function () {
   <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* Standardize text color for error states and handle browser autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Force text color when error exists even if autofilled */
+input.text-red-600:-webkit-autofill {
+  -webkit-text-fill-color: #dc2626 !important; /* red-600 */
+}
+</style>

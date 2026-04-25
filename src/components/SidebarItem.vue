@@ -40,7 +40,6 @@ const userRole = computed(() => {
 
 <template>
   <div class="flex flex-col">
-    <!-- Main Sidebar Item - Hidden for 'Log Out' to consolidate with UserInfo -->
     <div
       v-if="title !== 'Log Out'"
       @click="$emit('click')"
@@ -71,7 +70,6 @@ const userRole = computed(() => {
       </span>
     </div>
 
-    <!-- UserInfo component used as the final sidebar item, replacing 'Log Out' -->
     <div 
       v-if="title === 'Log Out'" 
       class="flex flex-col mt-auto border-t border-white/10 pt-4 mb-4"
@@ -102,7 +100,6 @@ const userRole = computed(() => {
 </template>
 
 <style scoped>
-/* Ensure the container transitions smoothly */
 .user-info-wrapper {
   transition: all 0.3s ease-in-out;
 }

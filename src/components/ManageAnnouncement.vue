@@ -63,7 +63,6 @@ const closePopUp = (operate) => {
   }
 }
 
-// Announcement Data & Logic
 const { announcements } = storeToRefs(announcementManager)
 const categories = ref([])
 
@@ -89,7 +88,6 @@ const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
 
-// Reset to page 1 whenever filters change to avoid empty pages
 watch([searchQuery, selectedCategory, selectedDate], () => {
   currentPage.value = 1
 })
@@ -100,7 +98,7 @@ const totalDrafts = computed(() => announcements.value.filter(a => a.status?.toL
 const totalViews = computed(() => announcements.value.reduce((sum, a) => sum + (a.views || 0), 0))
 
 const isCategoryAsc = ref(true)
-const isDateAsc = ref(false) // Default newest first for announcements
+const isDateAsc = ref(false) 
 const isStatusAsc = ref(true)
 const currentSort = ref('pinned')
 
@@ -126,10 +124,9 @@ const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
     
-    // Date Filtering Logic
     let matchesDate = true
     if (selectedDate.value) {
-      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const targetDate = selectedDate.value 
       const rawDateStr = item.publishAt || item.datePosted || ''
       
       if (rawDateStr && rawDateStr !== 'Just now') {
@@ -151,10 +148,8 @@ const filteredAnnouncements = computed(() => {
     return matchesCategory && matchesDate
   })
 
-  // Start with searched results
   let result = searchAnnouncements(filtered, searchQuery.value)
 
-  // Apply sorting
   if (currentSort.value === 'category') {
     isCategoryAsc.value ? sortByCategory(result) : sortByCategoryReverse(result)
   } else if (currentSort.value === 'date') {
@@ -217,7 +212,6 @@ const handleEdit = (item) => {
 
 const handleView = async (item) => {
   try {
-    // 1. Fetch fresh announcement details (without recording a view for staff)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -249,14 +243,13 @@ const handlePin = async (item) => {
     return
   }
 
-  // Construct payload focusing on necessary fields for UpdateAnnouncementDto
   const payload = {
     title: item.title,
     subtitle: item.subtitle || '',
     content: item.content || '',
     categoryId: item.categoryId || (item.category ? item.category.id : item.category),
     pinned: newPinnedStatus,
-    sendNotification: false, // Don't re-notify when just pinning
+    sendNotification: false, 
     priority: item.priority || 1,
     publishAt: item.publishAt || null,
     targetAudience: item.targetAudience || 'ALL_RESIDENTS',
@@ -269,7 +262,6 @@ const handlePin = async (item) => {
     const updated = await editAnnouncementWithFile(url, item.id, payload, router)
     
     if (updated) {
-      // Update local state and manager
       item.pinned = newPinnedStatus
       announcementManager.updateAnnouncement(updated)
     } else {
@@ -289,11 +281,19 @@ const onDeleteConfirm = () => {
   if (selectedAnnouncement.value) {
     announcementManager.moveAnnouncementToTrash(selectedAnnouncement.value.id)
     deleteSuccess.value = true
+    setTimeout(() => {
+      deleteSuccess.value = false
+    }, 10000)
   }
   showDeleteModal.value = false
   selectedAnnouncement.value = null
 }
-
+const openErrorPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showDeleteModal.value = false
+  selectedAnnouncement.value = null
+}
 const fetchAnnouncementData = async () => {
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
@@ -317,7 +317,6 @@ onMounted(async () => {
     fetchCategoriesFromAnnouncements()
   ])
 
-  // Set up auto-refresh every 30 seconds to keep stats and view counts fresh for staff
   statsInterval = setInterval(() => {
     fetchAnnouncementData()
   }, 30000)
@@ -375,6 +374,7 @@ const showProfileStaffPage = async function () {
       :is-permanent="false"
       @confirm-detail="onDeleteConfirm"
       @cancel-detail="showDeleteModal = false"
+      @redAlert="openErrorPopup"
     />
 
     <teleport to="body">
@@ -395,6 +395,14 @@ const showProfileStaffPage = async function () {
           operate="pinLimitMessage"
           @closePopUp="closePopUp"
         />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+          />
       </div>
     </teleport>
     <div class="flex flex-1">
@@ -569,11 +577,8 @@ const showProfileStaffPage = async function () {
           </SidebarItem>
         </aside>
      
-
-      <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-7xl mx-auto">
-          <!-- Header & Actions -->
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -591,11 +596,10 @@ const showProfileStaffPage = async function () {
             </div>
           </div>
 
-          <!-- Stats Cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
                 </div>
                 <div>
@@ -607,7 +611,7 @@ const showProfileStaffPage = async function () {
             
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-blue-600 bg-blue-50 p-3 rounded-xl shadow-inner">
+                <div class="text-red-600 bg-red-50 p-3 rounded-xl shadow-inner">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                 </div>
                 <div>
@@ -631,7 +635,7 @@ const showProfileStaffPage = async function () {
 
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner" title="Total views from all announcements">
+                <div class="text-blue-600 bg-blue-50 p-3 rounded-xl shadow-inner" title="Total views from all announcements">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </div>
                 <div>
@@ -641,8 +645,6 @@ const showProfileStaffPage = async function () {
               </div>
             </div>
           </div>
-
-          <!-- Announcement Filters -->
           <AnnouncementFilterBar
             v-model:search="searchQuery"
             v-model:category="selectedCategory"
@@ -651,8 +653,6 @@ const showProfileStaffPage = async function () {
             v-model:viewMode="viewMode"
             @new-announcement="showNewAnnouncementPage"
           />
-
-          <!-- Category Filter -->
           <div class="mb-6 w-full">
             <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               
@@ -714,8 +714,6 @@ const showProfileStaffPage = async function () {
               </button>
             </div>
           </div>
-
-          <!-- Announcement Table -->
           <AnnouncementTable
             :items="paginatedAnnouncements"
             :pages="pages"
