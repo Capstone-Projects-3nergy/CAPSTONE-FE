@@ -39,7 +39,6 @@ const handleSendEmailNotification = async () => {
     return
   }
 
-  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
   const currentStatusUpper = String(currentStatus.value || form.value.status || '').toUpperCase()
   if (currentStatusUpper !== 'PENDING') {
     emit('showAlert', {

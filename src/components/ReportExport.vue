@@ -416,7 +416,7 @@ const parcelHistory = computed(() => {
     if (pDate && !isNaN(pDate.getTime()) && pDate <= limitDate) {
       addEvent(pDate, 'pickedUp');
     }
-    const becomesOverdueAt = null; // We no longer auto-calculate overdue time in history
+    const becomesOverdueAt = null; 
     
     let overdueFoundInHistory = false;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
