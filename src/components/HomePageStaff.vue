@@ -418,10 +418,25 @@ const dataLabelsPlugin = {
         const value = dataset.data[index];
         if (value > 0) {
           ctx.fillStyle = '#111827';
-          ctx.font = 'black 10px Inter';
+          ctx.font = 'bold 10px Inter';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(value, bar.x, bar.y - 4);
+
+          
+          let isTopmost = true;
+          for (let j = i + 1; j < data.datasets.length; j++) {
+            if (data.datasets[j].type !== 'line' && !chart.getDatasetMeta(j).hidden && data.datasets[j].data[index] > 0) {
+              isTopmost = false;
+              break;
+            }
+          }
+
+          if (isTopmost) {
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(value, bar.x, bar.y - 4);
+          } else {
+            ctx.textBaseline = 'top';
+            ctx.fillText(value, bar.x, bar.y + 2);
+          }
         }
       });
     });
@@ -594,27 +609,36 @@ let parcelChartInstance = null;
 const updateParcelChart = () => {
   if (!parcelChartInstance) return;
 
-  const data = dashboardStore.chartData;
-  let labels = [...data.labels];
-  let received = [...data.datasets[0].data];
-  let staffWaiting = [...data.datasets[1].data];
-  let pickedUp = [...data.datasets[2].data];
-  let overdue = [...data.datasets[3].data];
+  const storeData = dashboardStore.chartData;
+  const labels = [...storeData.labels];
+  
+  
+  const datasets = storeData.datasets.map(ds => ({
+    ...ds,
+    sum: ds.data.reduce((a, b) => a + b, 0)
+  }));
+
+  
+  datasets.sort((a, b) => a.sum - b.sum);
 
   parcelChartInstance.data.labels = labels;
-  parcelChartInstance.data.datasets[0].data = received;
-  parcelChartInstance.data.datasets[1].data = staffWaiting;
-  parcelChartInstance.data.datasets[2].data = pickedUp;
-  parcelChartInstance.data.datasets[3].data = overdue;
+  parcelChartInstance.data.datasets = datasets;
   
-  const totalReceived = received.reduce((a, b) => a + b, 0) + staffWaiting.reduce((a, b) => a + b, 0);
-  const avg = totalReceived / (received.length || 1);
+  const totalReceived = datasets.reduce((acc, ds) => {
+    if (ds.label === 'Waiting' || ds.label === 'Waiting for Staff') {
+        return acc + ds.data.reduce((a, b) => a + b, 0);
+    }
+    return acc;
+  }, 0);
+  
+  const avg = totalReceived / (labels.length || 1);
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  const datasets = parcelChartInstance.data.datasets;
-  if (datasets.length < 5) {
-    datasets.push({
+
+  const currentDatasets = parcelChartInstance.data.datasets;
+  if (!currentDatasets.some(ds => ds.type === 'line')) {
+    currentDatasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
       type: 'line',
@@ -626,7 +650,7 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    const avgDs = datasets.find(ds => ds.type === 'line' && (ds.label.includes('Avg') || ds.label.includes('AVG')));
+    const avgDs = currentDatasets.find(ds => ds.type === 'line');
     if (avgDs) {
       avgDs.data = new Array(labels.length).fill(avg.toFixed(1));
       avgDs.label = `Avg (${avg.toFixed(1)})`;
@@ -913,7 +937,7 @@ onMounted(async () => {
       },
       scales: {
         x: { 
-          stacked: false,
+          stacked: true,
           grid: { display: false, drawBorder: false },
           ticks: { font: { family: "'Inter', sans-serif", size: 10 }, color: '#9CA3AF' },
           title: {
@@ -926,7 +950,7 @@ onMounted(async () => {
           }
         },
         y: {
-          stacked: false,
+          stacked: true,
           beginAtZero: true,
           suggestedMax: 10,
           grace: '15%',
@@ -1780,7 +1804,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Picked Up</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Picked Up</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
                     </div>
                   </div>
@@ -1789,7 +1813,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3" stroke-width="3" stroke-linecap="round"></path><circle cx="12" cy="12" r="9" stroke-width="2" stroke-linecap="round"></circle></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting for Staff</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting for Staff</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.waitingForStaffParcels }}</span>
                     </div>
                   </div>
@@ -1798,7 +1822,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
@@ -1807,7 +1831,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Overdue</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Overdue</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>

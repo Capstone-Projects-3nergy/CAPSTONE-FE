@@ -128,18 +128,41 @@ const dateRange = computed(() => {
 
 const snapshotDate = computed(() => dateRange.value.end)
 
+const parseDate = (dStr) => {
+  if (!dStr) return null
+  if (dStr instanceof Date) return dStr
+  
+  let s = String(dStr).trim()
+  const match = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|\s)(\d{2}):(\d{2}):(\d{2})/)
+  if (match) {
+    const [_, year, month, day, hour, min, sec] = match
+    return new Date(
+      parseInt(year, 10), 
+      parseInt(month, 10) - 1, 
+      parseInt(day, 10), 
+      parseInt(hour, 10), 
+      parseInt(min, 10), 
+      parseInt(sec, 10)
+    )
+  }
+  
+  const normalized = s.includes(' ') && !s.includes('T') ? s.replace(' ', 'T') : s
+  const d = new Date(normalized)
+  return isNaN(d.getTime()) ? null : d
+}
+
 const getStatusAtDate = (parcel, date) => {
-  const arrivalDate = new Date(parcel.receiveAt || parcel.createdAt || parcel.date);
-  if (arrivalDate > date) return null;
+  const arrivalDate = parseDate(parcel.receiveAt || parcel.createdAt || parcel.date);
+  if (!arrivalDate || arrivalDate > date) return null;
 
   if (parcel.statusHistory && Array.isArray(parcel.statusHistory) && parcel.statusHistory.length > 0) {
     const validHistory = parcel.statusHistory
       .map(h => ({ 
         ...h, 
-        ts: new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date),
+        ts: parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date),
         st: (h.newStatus || h.status || '').toUpperCase().replace(/_/g, ' ')
       }))
-      .filter(h => h.ts <= date)
+      .filter(h => h.ts && h.ts <= date)
       .sort((a, b) => b.ts - a.ts);
 
     if (validHistory.length > 0) return validHistory[0].st;
@@ -148,10 +171,10 @@ const getStatusAtDate = (parcel, date) => {
   const currentStatus = (parcel.status || '').toUpperCase().replace(/_/g, ' ');
   
   if (currentStatus.includes('PICKED UP') || currentStatus.includes('TAKEN')) {
-    const pickupDate = new Date(parcel.pickedUpAt || parcel.updatedAt);
-    if (pickupDate > date) {
-      const verifiedDate = new Date(parcel.updatedAt);
-      if (verifiedDate > date) {
+    const pickupDate = parseDate(parcel.pickedUpAt || parcel.updatedAt);
+    if (pickupDate && pickupDate > date) {
+      const verifiedDate = parseDate(parcel.updatedAt);
+      if (verifiedDate && verifiedDate > date) {
          return 'WAITING FOR STAFF';
       }
       return 'WAITING';
@@ -164,8 +187,8 @@ const getStatusAtDate = (parcel, date) => {
   }
 
   if (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus.includes('NOTIFIED')) {
-    const verifiedDate = new Date(parcel.updatedAt);
-    if (verifiedDate > date) {
+    const verifiedDate = parseDate(parcel.updatedAt);
+    if (verifiedDate && verifiedDate > date) {
       return 'WAITING FOR STAFF';
     }
     return 'WAITING';
