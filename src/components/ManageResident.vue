@@ -155,6 +155,8 @@ const mapStatus = (status) => {
       return 'Waiting'
     case 'PENDING':
       return 'Pending'
+    case 'OVERDUE':
+      return 'Overdue'
     default:
       return status
   }

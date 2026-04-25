@@ -175,15 +175,17 @@ const statusOptions = computed(() => {
   const s = originalForm.value.status?.toUpperCase() || ''
 
   if (s === 'WAITING_FOR_STAFF') {
-    options = ['WAITING_FOR_STAFF', 'RECEIVED']
+    options = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
   } else if (s === 'RECEIVED') {
-    options = ['RECEIVED', 'PICKED_UP']
+    options = ['WAITING', 'PICKED_UP']
   } else if (s === 'WAITING') {
     options = ['WAITING', 'PICKED_UP']
+  } else if (s === 'OVERDUE') {
+    options = ['OVERDUE', 'PICKED_UP']
   } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['WAITING', 'PICKED_UP']
+    options = ['WAITING', 'OVERDUE', 'PICKED_UP']
   }
   
   return options.map((s) => ({
@@ -1256,6 +1258,10 @@ function formatDateTime(datetimeStr) {
                     <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Waiting</span> 
+                    <template v-if="originalForm.status === 'OVERDUE'">
+                      <span class="mx-1 opacity-40">→</span> 
+                      <span class="text-[#0E4B90] font-bold">Overdue</span> 
+                    </template>
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Picked Up</span>
                   </p>

@@ -57,7 +57,8 @@ const statusOptions = computed(() => {
   if (s === 'WAITING_FOR_STAFF') {
     return [
       { value: 'WAITING_FOR_STAFF', label: 'Waiting for Staff' },
-      { value: 'RECEIVED', label: 'Received' }
+      { value: 'WAITING', label: 'Waiting' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
     ]
   }
   
@@ -70,7 +71,14 @@ const statusOptions = computed(() => {
 
   if (s === 'RECEIVED') {
     return [
-      { value: 'RECEIVED', label: 'Received' },
+      { value: 'WAITING', label: 'Waiting' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
+  if (s === 'OVERDUE') {
+    return [
+      { value: 'OVERDUE', label: 'Overdue' },
       { value: 'PICKED_UP', label: 'Picked Up' }
     ]
   }
@@ -151,12 +159,20 @@ const cancel = () => {
   router.replace({ name: 'staffparcels' })
 }
 
-const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
+const steps = computed(() => {
+  const s = currentStatus.value?.toUpperCase() || ''
+  if (s === 'OVERDUE') {
+    return ['WAITING_FOR_STAFF', 'WAITING', 'OVERDUE', 'PICKED_UP']
+  }
+  return ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
+})
+
 const getStepLabel = (step) => {
   if (step === 'WAITING_FOR_STAFF') return 'WAITING FOR STAFF' 
   if (step === 'WAITING') {
     return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
   }
+  if (step === 'OVERDUE') return 'OVERDUE'
   if (step === 'PICKED_UP') return 'PICKED UP'
   return step.replace(/_/g, ' ')
 }
@@ -164,7 +180,8 @@ const getStepLabel = (step) => {
 const currentStepIndex = computed(() => {
   const s = currentStatus.value?.toUpperCase() || ''
   if (s === 'RECEIVED' || s === 'WAITING') return 1
-  if (s === 'PICKED_UP') return 2
+  if (s === 'OVERDUE') return 2
+  if (s === 'PICKED_UP') return steps.value.length - 1
   return 0
 })
 </script>
@@ -270,6 +287,27 @@ const currentStepIndex = computed(() => {
                 :disabled="isPickUp"
                 placeholder="Choose Status..."
               />
+
+              <div v-if="!isPickUp" class="mt-6 p-4 bg-blue-50/50 border border-blue-100/50 rounded-2xl flex items-start gap-3 transition-all hover:bg-blue-50/80">
+                <div class="p-2 bg-white rounded-xl shadow-sm border border-blue-100 shrink-0">
+                  <svg class="w-4 h-4 text-[#0E4B90]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p class="text-[11px] text-[#0E4B90]/70 leading-relaxed font-medium">
+                  <span class="block text-[10px] font-black text-[#0E4B90] uppercase tracking-wider mb-1">Status Update Guide</span>
+                  You can only update the status in order: 
+                  <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
+                  <span class="mx-1 opacity-30">→</span> 
+                  <span class="text-[#0E4B90] font-bold">Waiting</span> 
+                  <template v-if="currentStatus === 'OVERDUE'">
+                    <span class="mx-1 opacity-30">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Overdue</span> 
+                  </template>
+                  <span class="mx-1 opacity-30">→</span> 
+                  <span class="text-[#0E4B90] font-bold">Picked Up</span>
+                </p>
+              </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">

@@ -135,12 +135,7 @@ const overdueParcelsList = computed(() => {
   const oneDayMs = 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
-    .filter(p => {
-      if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
-      const receivedDate = new Date(p.receiveAt)
-      if (isNaN(receivedDate.getTime())) return false
-      return (now - receivedDate) > oneDayMs
-    })
+    .filter(p => p.status === 'Overdue')
     .sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 })
 
@@ -255,6 +250,8 @@ const mapStatus = (status) => {
     case 'WAITING':
     case 'WAIT':
       return 'Waiting'
+    case 'OVERDUE':
+      return 'Overdue'
     default:
       return status
   }
@@ -615,8 +612,9 @@ const updateParcelChart = () => {
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  if (parcelChartInstance.data.datasets.length < 5) {
-    parcelChartInstance.data.datasets.push({
+  const datasets = parcelChartInstance.data.datasets;
+  if (datasets.length < 5) {
+    datasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
       type: 'line',
@@ -628,8 +626,11 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[4].data = new Array(labels.length).fill(avg.toFixed(1));
-    parcelChartInstance.data.datasets[4].label = `Avg (${avg.toFixed(1)})`;
+    const avgDs = datasets.find(ds => ds.type === 'line' && (ds.label.includes('Avg') || ds.label.includes('AVG')));
+    if (avgDs) {
+      avgDs.data = new Array(labels.length).fill(avg.toFixed(1));
+      avgDs.label = `Avg (${avg.toFixed(1)})`;
+    }
   }
 
   const interval = dashboardStore.parcelView;
@@ -839,10 +840,12 @@ onMounted(async () => {
         ...ds,
         backgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 0.85)' : 
                         (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 0.85)' :
-                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)')),
+                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 
+                        (ds.label === 'Overdue' ? 'rgba(239, 68, 68, 0.85)' : 'rgba(156, 163, 175, 0.85)'))),
         hoverBackgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 1)' : 
                              (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 1)' :
-                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)')),
+                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 
+                             (ds.label === 'Overdue' ? 'rgba(239, 68, 68, 1)' : 'rgba(156, 163, 175, 1)'))),
         borderRadius: 4,
         borderSkipped: false,
         barThickness: dashboardStore.currentView === 'daily' ? 12 : 24

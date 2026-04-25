@@ -155,6 +155,10 @@ const getStatusAtDate = (parcel, date) => {
     return 'PICKED UP';
   }
 
+  if (currentStatus.includes('OVERDUE')) {
+    return 'OVERDUE';
+  }
+
   if (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus.includes('NOTIFIED')) {
     const verifiedDate = new Date(parcel.updatedAt);
     if (verifiedDate > date) {
@@ -221,13 +225,10 @@ const yearlyStats = computed(() => {
       } else if (s.includes('WAITING FOR STAFF') || s.includes('STAFF')) {
         res.waitingForStaff++;
         res.awaiting++;
+      } else if (s.includes('OVERDUE')) {
+        res.overdue++;
       } else {
-        const overdueThresholdMs = 24 * 60 * 60 * 1000;
-        if ((endLimit - arrivalDate) > overdueThresholdMs) {
-          res.overdue++;
-        } else {
-          res.awaiting++;
-        }
+        res.awaiting++;
       }
     }
   });
@@ -283,15 +284,7 @@ const dynamicStats = computed(() => {
                              !currentStatus.includes('STAFF') && isArrivalInRange && !currentStatus.includes('OVERDUE');
     if (isWaitingInRange) result.awaiting++;
 
-    let isOverdueInRange = hasStatusInRange(['OVERDUE']);
-    if (!isOverdueInRange && !isNaN(arrivalDate.getTime())) {
-      const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000));
-      if (overdueDate >= start && overdueDate <= end && 
-          !(currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')) && 
-          !(currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))) {
-        isOverdueInRange = true;
-      }
-    }
+    const isOverdueInRange = hasStatusInRange(['OVERDUE']) || (currentStatus.includes('OVERDUE') && isUpdateInRange);
     if (isOverdueInRange) result.overdue++;
 
     if (isArrivalInRange || isUpdateInRange || isPickedUpInRange || isStaffInRange || isOverdueInRange) {
@@ -340,11 +333,9 @@ const filteredOverdue = computed(() => {
     if (!statusAtDate) return false;
 
     const s = statusAtDate.toUpperCase().replace(/[\s_-]/g, '');
-    const isPickedUp = s.includes('PICKEDUP') || s.includes('TAKEN');
-    const isStaff = s.includes('STAFF') || s.includes('PENDING');
-    const isOverdueAtDate = (date - arrivalDate) > overdueThresholdMs;
+    const isOverdueAtDate = s.includes('OVERDUE');
 
-    return !isPickedUp && !isStaff && isOverdueAtDate;
+    return isOverdueAtDate;
   });
 });
 
@@ -425,17 +416,21 @@ const parcelHistory = computed(() => {
     if (pDate && !isNaN(pDate.getTime()) && pDate <= limitDate) {
       addEvent(pDate, 'pickedUp');
     }
-    const overdueThresholdMs = 24 * 60 * 60 * 1000;
-    const becomesOverdueAt = new Date(arrivalDate.getTime() + overdueThresholdMs);
+    const becomesOverdueAt = null; // We no longer auto-calculate overdue time in history
     
-    if (becomesOverdueAt <= limitDate) {
-      const statusAtOverdue = getStatusAtDate(p, becomesOverdueAt);
-      const s = (statusAtOverdue || '').toUpperCase();
-      const isAlreadyPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
-      const isStaff = s.includes('STAFF');
-      
-      if (!isAlreadyPickedUp && !isStaff) {
-        addEvent(becomesOverdueAt, 'overdue');
+    if (p.statusHistory && Array.isArray(p.statusHistory)) {
+      p.statusHistory.forEach(h => {
+        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+        if (s.includes('OVERDUE')) {
+          const oDate = new Date(h.timestamp || h.updatedAt || h.createdAt);
+          if (oDate <= limitDate) addEvent(oDate, 'overdue');
+        }
+      });
+    } else {
+      const s = (p.status || '').toUpperCase().replace(/[\s_-]/g, '');
+      if (s.includes('OVERDUE')) {
+        const oDate = new Date(p.updatedAt || p.updateAt);
+        if (oDate <= limitDate) addEvent(oDate, 'overdue');
       }
     }
 
