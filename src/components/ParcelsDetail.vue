@@ -672,6 +672,7 @@ function formatDateTime(datetimeStr) {
                       class="w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all duration-500 overflow-hidden"
                       :class="{
                         'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-100': parcel?.status === 'WAITING_FOR_STAFF',
+                        'bg-gradient-to-br from-red-400 to-rose-600 shadow-red-100': parcel?.status === 'OVERDUE',
                         'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING',
                         'bg-gradient-to-br from-emerald-400 to-green-600 shadow-green-100': parcel?.status === 'PICKED_UP'
                       }"
@@ -684,18 +685,18 @@ function formatDateTime(datetimeStr) {
                   <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Status</h4>
                   <div class="flex items-center gap-3">
                     <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
-                    <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">Overdue</span>
                   </div>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
                     {{ 
                       parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 
                       parcel?.status === 'WAITING_FOR_STAFF' ? 'Waiting for staff to verify with the courier.' : 
+                      parcel?.status === 'OVERDUE' ? 'The parcel has exceeded the collection time.' :
                       'Waiting for resident to pick up.' 
                     }}
                   </p>
                </div>
 
-               <div v-if="parcel?.status !== 'PICKED_UP' && parcel?.status !== 'WAITING_FOR_STAFF' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
+               <div v-if="parcel?.status === 'OVERDUE'" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
                   <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
 
                   <div class="relative z-10">

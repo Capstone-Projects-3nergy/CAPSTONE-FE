@@ -180,10 +180,12 @@ const statusOptions = computed(() => {
     options = ['RECEIVED', 'PICKED_UP']
   } else if (s === 'WAITING') {
     options = ['WAITING', 'PICKED_UP']
+  } else if (s === 'OVERDUE') {
+    options = ['OVERDUE', 'PICKED_UP']
   } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['WAITING', 'PICKED_UP']
+    options = ['WAITING', 'OVERDUE', 'PICKED_UP']
   }
   
   return options.map((s) => ({
@@ -1256,6 +1258,8 @@ function formatDateTime(datetimeStr) {
                     <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Waiting</span> 
+                    <span class="mx-1 opacity-40">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Overdue</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Picked Up</span>
                   </p>

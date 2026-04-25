@@ -989,6 +989,7 @@ const mapStatus = (status) => {
     case 'PICKED_UP': return 'Picked Up'
     case 'RECEIVED': return 'Received'
     case 'WAITING': return 'Waiting'
+    case 'OVERDUE': return 'Overdue'
     default: return status
   }
 }

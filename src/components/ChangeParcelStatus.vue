@@ -75,6 +75,13 @@ const statusOptions = computed(() => {
     ]
   }
 
+  if (s === 'OVERDUE') {
+    return [
+      { value: 'OVERDUE', label: 'Overdue' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
   return [
     { value: s, label: s.replace(/_/g, ' ') }
   ]
@@ -151,12 +158,13 @@ const cancel = () => {
   router.replace({ name: 'staffparcels' })
 }
 
-const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
+const steps = ['WAITING_FOR_STAFF', 'WAITING', 'OVERDUE', 'PICKED_UP']
 const getStepLabel = (step) => {
   if (step === 'WAITING_FOR_STAFF') return 'WAITING FOR STAFF' 
   if (step === 'WAITING') {
     return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
   }
+  if (step === 'OVERDUE') return 'OVERDUE'
   if (step === 'PICKED_UP') return 'PICKED UP'
   return step.replace(/_/g, ' ')
 }
@@ -164,7 +172,8 @@ const getStepLabel = (step) => {
 const currentStepIndex = computed(() => {
   const s = currentStatus.value?.toUpperCase() || ''
   if (s === 'RECEIVED' || s === 'WAITING') return 1
-  if (s === 'PICKED_UP') return 2
+  if (s === 'OVERDUE') return 2
+  if (s === 'PICKED_UP') return 3
   return 0
 })
 </script>

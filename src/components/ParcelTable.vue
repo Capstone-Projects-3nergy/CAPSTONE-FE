@@ -433,7 +433,7 @@ const authStore = useAuthManager()
                     'bg-yellow-50 text-yellow-600': ['Waiting for Staff', 'Pending', 'WAITING_FOR_STAFF', 'PENDING'].includes(p.status),
                     'bg-green-50 text-green-600': ['Picked Up', 'PICKED_UP'].includes(p.status),
                     'bg-blue-50 text-blue-600': ['Received', 'Waiting', 'RECEIVED', 'WAITING'].includes(p.status),
-                    'bg-red-50 text-red-600': ['TRASH', 'Trash'].includes(p.status)
+                    'bg-red-50 text-red-600': ['TRASH', 'Trash', 'Overdue', 'OVERDUE'].includes(p.status)
                   },
                   clickableStatus ? 'cursor-pointer ' : 'cursor-default '
                 ]"
