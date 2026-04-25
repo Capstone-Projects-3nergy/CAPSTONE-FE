@@ -421,7 +421,7 @@ const dataLabelsPlugin = {
           ctx.font = 'bold 10px Inter';
           ctx.textAlign = 'center';
 
-          // Check if this is the topmost segment for this bar index
+          
           let isTopmost = true;
           for (let j = i + 1; j < data.datasets.length; j++) {
             if (data.datasets[j].type !== 'line' && !chart.getDatasetMeta(j).hidden && data.datasets[j].data[index] > 0) {
@@ -612,15 +612,13 @@ const updateParcelChart = () => {
   const storeData = dashboardStore.chartData;
   const labels = [...storeData.labels];
   
-  // Prepare datasets and calculate their totals for sorting
-  // Note: We keep the original labels but sort the data to put "higher numbers higher"
+  
   const datasets = storeData.datasets.map(ds => ({
     ...ds,
     sum: ds.data.reduce((a, b) => a + b, 0)
   }));
 
-  // Sort: Smaller totals at the bottom (index 0), Larger totals at the top
-  // This satisfies "เลขมากกว่าอยู่สูงกว่า" in a general sense for the whole chart
+  
   datasets.sort((a, b) => a.sum - b.sum);
 
   parcelChartInstance.data.labels = labels;
@@ -637,7 +635,7 @@ const updateParcelChart = () => {
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  // Handle Avg line separately
+
   const currentDatasets = parcelChartInstance.data.datasets;
   if (!currentDatasets.some(ds => ds.type === 'line')) {
     currentDatasets.push({
