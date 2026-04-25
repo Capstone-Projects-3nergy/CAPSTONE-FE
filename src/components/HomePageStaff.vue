@@ -1804,7 +1804,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Picked Up</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Picked Up</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
                     </div>
                   </div>
@@ -1813,7 +1813,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3" stroke-width="3" stroke-linecap="round"></path><circle cx="12" cy="12" r="9" stroke-width="2" stroke-linecap="round"></circle></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting for Staff</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting for Staff</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.waitingForStaffParcels }}</span>
                     </div>
                   </div>
@@ -1822,7 +1822,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
@@ -1831,7 +1831,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Overdue</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Overdue</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>

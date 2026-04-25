@@ -168,13 +168,14 @@ const steps = computed(() => {
 })
 
 const getStepLabel = (step) => {
-  if (step === 'WAITING_FOR_STAFF') return 'WAITING FOR STAFF' 
+  if (step === 'WAITING_FOR_STAFF') return 'Waiting for Staff' 
   if (step === 'WAITING') {
-    return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
+    return currentStatus.value === 'RECEIVED' ? 'Received' : 'Waiting'
   }
-  if (step === 'OVERDUE') return 'OVERDUE'
-  if (step === 'PICKED_UP') return 'PICKED UP'
-  return step.replace(/_/g, ' ')
+  if (step === 'OVERDUE') return 'Overdue'
+  if (step === 'PICKED_UP') return 'Picked Up'
+  const s = step.replace(/_/g, ' ').toLowerCase()
+  return s.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
 
 const currentStepIndex = computed(() => {
@@ -205,7 +206,7 @@ const currentStepIndex = computed(() => {
           </div>
           <h3 class="text-2xl font-black text-slate-900 mb-2">Success!</h3>
           <p class="text-slate-500 mb-8 leading-relaxed">
-            The status for parcel <span class="font-bold text-slate-900">#{{ form.trackingNumber }}</span> has been updated to <span class="font-bold text-emerald-600">{{ newStatus.replace('_', ' ') }}</span>.
+            The status for parcel tracking number <span class="font-bold text-slate-900">{{ form.trackingNumber }}</span> has been updated to <span class="font-bold text-emerald-600">{{ getStepLabel(newStatus) }}</span>.
           </p>
           <ButtonWeb
             label="Dismiss"
@@ -261,7 +262,7 @@ const currentStepIndex = computed(() => {
                     </svg>
                     <div v-if="currentStepIndex === i" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
-                  <span class="text-[8px] font-extrabold tracking-tighter uppercase text-center leading-none" 
+                  <span class="text-[8px] font-extrabold tracking-tighter text-center leading-none" 
                         :class="currentStepIndex === i ? 'text-blue-600' : 'text-slate-400'">
                     {{ getStepLabel(step) }}
                   </span>
@@ -295,7 +296,7 @@ const currentStepIndex = computed(() => {
                   </svg>
                 </div>
                 <p class="text-[11px] text-[#0E4B90]/70 leading-relaxed font-medium">
-                  <span class="block text-[10px] font-black text-[#0E4B90] uppercase tracking-wider mb-1">Status Update Guide</span>
+                  <span class="block text-[10px] font-black text-[#0E4B90] tracking-wider mb-1">Status Update Guide</span>
                   You can only update the status in order: 
                   <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                   <span class="mx-1 opacity-30">→</span> 
