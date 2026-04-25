@@ -418,19 +418,27 @@ const parcelHistory = computed(() => {
     }
     const becomesOverdueAt = null; // We no longer auto-calculate overdue time in history
     
+    let overdueFoundInHistory = false;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       p.statusHistory.forEach(h => {
         const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
         if (s.includes('OVERDUE')) {
           const oDate = new Date(h.timestamp || h.updatedAt || h.createdAt);
-          if (oDate <= limitDate) addEvent(oDate, 'overdue');
+          if (!isNaN(oDate.getTime()) && oDate <= limitDate) {
+            addEvent(oDate, 'overdue');
+            overdueFoundInHistory = true;
+          }
         }
       });
-    } else {
+    }
+    
+    if (!overdueFoundInHistory) {
       const s = (p.status || '').toUpperCase().replace(/[\s_-]/g, '');
       if (s.includes('OVERDUE')) {
         const oDate = new Date(p.updatedAt || p.updateAt);
-        if (oDate <= limitDate) addEvent(oDate, 'overdue');
+        if (!isNaN(oDate.getTime()) && oDate <= limitDate) {
+          addEvent(oDate, 'overdue');
+        }
       }
     }
 
@@ -533,7 +541,6 @@ const businessInsights = computed(() => {
 });
 
 const handleExportExcel = () => {
-  const stats = dailyStats.value;
   const snapshot = dynamicStats.value;
   const overdueList = filteredOverdue.value;
   const pending = filteredPendingResidents.value;
