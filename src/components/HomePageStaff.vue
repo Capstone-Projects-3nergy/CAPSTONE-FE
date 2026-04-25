@@ -1109,12 +1109,24 @@ const showProfileStaffPage = async function () {
 const activeTab = ref('parcel')
 
 const rangeError = ref(false)
+const rangeErrorMessage = ref('')
 let rangeErrorTimeout = null
 
 const validateReportRange = () => {
   if (reportMode.value === 'range') {
     if (!selectedReportDate.value || !reportEndDate.value) {
       rangeError.value = true
+      rangeErrorMessage.value = 'Please select both start and end dates for Custom Range.'
+      if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+      rangeErrorTimeout = setTimeout(() => {
+        rangeError.value = false
+      }, 10000)
+      return false
+    }
+
+    if (new Date(selectedReportDate.value) >= new Date(reportEndDate.value)) {
+      rangeError.value = true
+      rangeErrorMessage.value = 'End date must be after start date.'
       if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
       rangeErrorTimeout = setTimeout(() => {
         rangeError.value = false
@@ -1123,6 +1135,7 @@ const validateReportRange = () => {
     }
   }
   rangeError.value = false
+  rangeErrorMessage.value = ''
   return true
 }
 
@@ -1516,7 +1529,7 @@ watch([selectedReportDate, reportEndDate], () => {
                             ref="reportEndDateInput"
                             type="date"
                             v-model="reportEndDate"
-                            :min="selectedReportDate"
+                            :min="selectedReportDate ? new Date(new Date(selectedReportDate).getTime() + 86400000).toISOString().split('T')[0] : ''"
                             :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
                             class="absolute opacity-0 w-0 h-0 pointer-events-none"
                           />
@@ -1529,7 +1542,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 mr-1">
                         <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
                       </svg>
-                      Please select both start and end dates for Custom Range.
+                      {{ rangeErrorMessage }}
                     </div>
                   </div>
                 </div>
