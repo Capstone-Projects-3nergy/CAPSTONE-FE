@@ -640,6 +640,7 @@ async function startScan(mode) {
         highlightScanRegion: true,
         highlightCodeOutline: true,
         returnDetailedScanResult: true,
+        preferredCamera: 'environment',
         calculateScanRegion: (video) => {
           const width = window.innerWidth
           let size = 400 
@@ -692,7 +693,7 @@ async function startScan(mode) {
     zxingReader.hints = hints
 
     try {
-      zxingReader.decodeFromVideoDevice(undefined, videoElem, (result, err) => {
+      zxingReader.decodeFromConstraints({ video: { facingMode: 'environment' } }, videoElem, (result, err) => {
         if (result) {
           isSuccessScan.value = true
           setTimeout(() => {
@@ -1447,9 +1448,9 @@ onMounted(async () => {
                   "
                 >
                   <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative">
-                    <video id="barcode-video" class="w-full h-full object-cover"></video>
+                    <video id="barcode-video" playsinline muted class="w-full h-full object-cover"></video>
                   </div>
-                  <video id="qr-video" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
+                  <video id="qr-video" v-show="scanningMode === 'qr'" playsinline muted class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
                     class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
@@ -1475,6 +1476,8 @@ onMounted(async () => {
 
                 <video
                   ref="videoRef"
+                  playsinline
+                  muted
                   :class="
                     videoStream
                       ? 'w-full h-full object-cover rounded-3xl'

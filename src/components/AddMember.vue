@@ -571,6 +571,7 @@ const profileRef = ref(null)
           :useCurrentProfile="false"
           title="Add New Resident"
           :showEdit="false"
+          :showLineId="false"
           :userId="0"
           :fullName="''"
           @successAddProfile="showAddProfileSuccess"

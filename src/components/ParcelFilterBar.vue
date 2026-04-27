@@ -122,7 +122,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           type="date"
           :value="props.modelDate"
           @input="$emit('update:date', $event.target.value)"
-          class="absolute opacity-0 w-0 h-0 pointer-events-none"
+          class="absolute inset-0 opacity-0 cursor-pointer z-10"
         />
       </div>
 
