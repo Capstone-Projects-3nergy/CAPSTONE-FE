@@ -1624,8 +1624,10 @@ defineExpose({
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
-                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
+                'w-full h-[58px] border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT')
+                  ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium'
+                  : 'bg-gray-50/50 border-gray-100 text-gray-800 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
               ]"
             />
           </div>
