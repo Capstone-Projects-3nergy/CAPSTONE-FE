@@ -98,7 +98,8 @@ const formatDateDisplay = (dateStr) => {
           type="date"
           :value="date"
           @input="$emit('update:date', $event.target.value)"
-          class="absolute inset-0 opacity-0 cursor-pointer z-10"
+          @click="openDatePicker"
+          class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-30"
         />
       </div>
 

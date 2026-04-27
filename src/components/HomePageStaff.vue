@@ -1522,7 +1522,8 @@ watch([selectedReportDate, reportEndDate], () => {
                           :type="reportMode === 'weekly' ? 'week' : (reportMode === 'monthly' ? 'month' : 'date')"
                           v-model="selectedReportDate"
                           :max="maxReportDate"
-                          class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                          @click="openReportDatePicker"
+                          class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-30"
                         />
                       </div>
 
@@ -1555,7 +1556,7 @@ watch([selectedReportDate, reportEndDate], () => {
                             v-model="reportEndDate"
                             :min="selectedReportDate ? new Date(new Date(selectedReportDate).getTime() + 86400000).toISOString().split('T')[0] : ''"
                             :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
-                            class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
                           />
                         </div>
                       </template>
@@ -1780,7 +1781,7 @@ watch([selectedReportDate, reportEndDate], () => {
                        <button @click="dashboardStore.previousPeriod('parcel')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                        </button>
-                       <div class="relative">
+                       <div class="relative flex items-center justify-center">
                          <button @click="openParcelDatePicker" class="text-sm font-bold text-gray-700 min-w-[140px] text-center hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-gray-200" :title="`Select ${dashboardStore.parcelView}`">
                            {{ parcelChartRangeLabel }}
                          </button>
@@ -1788,7 +1789,8 @@ watch([selectedReportDate, reportEndDate], () => {
                            :type="dashboardStore.parcelView === 'monthly' ? 'month' : (dashboardStore.parcelView === 'weekly' ? 'week' : 'date')" 
                            :value="formatDateForInput(dashboardStore.parcelRefDate, dashboardStore.parcelView)" 
                            @input="e => handleDateChange(e.target.value, 'parcel')" 
-                           class="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                           @click="openParcelDatePicker"
+                           class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
                        </div>
                        <button @click="dashboardStore.nextPeriod('parcel')" :disabled="dashboardStore.isAtCurrentPeriod('parcel')" :class="dashboardStore.isAtCurrentPeriod('parcel') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
@@ -2219,7 +2221,7 @@ watch([selectedReportDate, reportEndDate], () => {
                          <button @click="dashboardStore.previousPeriod('resident')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                          </button>
-                         <div class="relative">
+                         <div class="relative flex items-center justify-center">
                            <button @click="openResidentDatePicker" class="text-sm font-bold text-gray-700 min-w-[140px] text-center hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-gray-200" :title="`Select ${dashboardStore.residentView}`">
                              {{ residentChartRangeLabel }}
                            </button>
@@ -2227,7 +2229,8 @@ watch([selectedReportDate, reportEndDate], () => {
                              :type="dashboardStore.residentView === 'monthly' ? 'month' : (dashboardStore.residentView === 'weekly' ? 'week' : 'date')" 
                              :value="formatDateForInput(dashboardStore.residentRefDate, dashboardStore.residentView)" 
                              @input="e => handleDateChange(e.target.value, 'resident')" 
-                             class="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                             @click="openResidentDatePicker"
+                             class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
                          </div>
                          <button @click="dashboardStore.nextPeriod('resident')" :disabled="dashboardStore.isAtCurrentPeriod('resident')" :class="dashboardStore.isAtCurrentPeriod('resident') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
