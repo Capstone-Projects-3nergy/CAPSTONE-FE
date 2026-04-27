@@ -39,26 +39,26 @@ const userRole = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col w-full">
     <div
       v-if="title !== 'Log Out'"
       @click="$emit('click')"
-      class="flex items-center cursor-pointer rounded-none transition-all duration-300 ease-in-out hover:scale-[1.02]"
+      class="flex items-center cursor-pointer rounded-none transition-all duration-300 ease-in-out hover:scale-[1.02] w-full"
       :class="[
         title !== 'Tractify' 
-          ? (collapsed ? '!px-0 !justify-center hover:bg-white/20 hover:shadow-lg py-4' : 'hover:bg-white/20 hover:shadow-lg p-4 gap-3') 
+          ? (isCollapsed ? '!px-0 !justify-center hover:bg-white/20 hover:shadow-lg py-4' : 'hover:bg-white/20 hover:shadow-lg p-4 gap-3') 
           : 'py-4 pr-4 pl-2 gap-5',
-        collapsed && title === 'Tractify' ? '!px-0 !justify-center' : ''
+        isCollapsed && title === 'Tractify' ? '!px-0 !justify-center' : ''
       ]"
     >
       <div 
         class="flex-shrink-0 flex items-center justify-center transition-all duration-300"
-        :class="collapsed && title === 'Tractify' ? 'scale-110' : ''"
+        :class="isCollapsed && title === 'Tractify' ? 'scale-110' : ''"
       >
         <slot name="icon"></slot>
       </div>
       <span
-        v-if="!collapsed"
+        v-if="!isCollapsed"
         class="whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left"
         :class="
           title === 'Tractify'
@@ -72,19 +72,19 @@ const userRole = computed(() => {
 
     <div 
       v-if="title === 'Log Out'" 
-      class="flex flex-col mt-auto border-t border-white/10 pt-4 mb-4"
+      class="flex flex-col mt-auto border-t border-white/10 pt-4 mb-4 w-full"
     >
       <div 
         @click="userInfoRef?.toggleDropdown"
         class="group/user flex items-center cursor-pointer transition-all duration-300 hover:bg-white/20 hover:shadow-lg rounded-none w-full py-4 active:bg-white/30"
-        :class="collapsed ? 'justify-center px-0' : 'px-4 gap-3'"
+        :class="isCollapsed ? 'justify-center px-0' : 'px-4 gap-3'"
       >
         <div class="flex-shrink-0">
           <UserInfo ref="userInfoRef" align="left" manual-trigger />
         </div>
         
         <div 
-          v-if="!collapsed" 
+          v-if="!isCollapsed" 
           class="flex flex-col min-w-0 transition-all duration-300"
         >
           <span class="text-[14px] font-bold text-gray-300 truncate">
