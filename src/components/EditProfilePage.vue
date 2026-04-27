@@ -226,7 +226,6 @@ onMounted(async () => {
 
   if (profile) {
     profileManager.setCurrentProfile(profile)
-    form.value = { ...profile }
     originalForm.value = { ...profile }
   }
 })

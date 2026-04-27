@@ -1022,8 +1022,7 @@ const saveEditProfile = async () => {
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null,
-      lineId: form.value.lineId || null
+      phoneNumber: form.value.phoneNumber || null
     }
 
     if (isStaff) {
@@ -1047,7 +1046,6 @@ const saveEditProfile = async () => {
       return
     }
     loading.value = false
-    profileManager.setCurrentProfile(profile)
     profileManager.setCurrentProfile(updated)
     loginManager.updateUser(updated)
     newAvatar.value = null
@@ -1751,7 +1749,7 @@ defineExpose({
             </div>
           </div>
 
-          <div v-if="showLineId" class="flex flex-col">
+          <div v-if="showLineId && loginManager.user?.role !== 'STAFF'" class="flex flex-col">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Line ID
             </label>
